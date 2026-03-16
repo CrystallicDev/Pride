@@ -1,0 +1,33 @@
+modLoader="javafml" # mandatory
+loaderVersion="[40,)" # Forge for 1.18.2 starts at 40.x
+license="MIT"
+# Optional: replace with a real link later
+# issueTrackerURL="https://github.com/yourname/yourmod/issues"
+
+[[mods]]
+modId="pride"
+version="1.0.0"
+displayName="Warrior's Pride"
+authors="Natsu91"
+description='''
+A mod that replace the whole PvP system, to try to
+revert it back to what it was in 1.8.9 / 1.7.10
+Pride is the only reason you stand
+'''
+
+[[dependencies.pride]]
+modId="forge"
+mandatory=true
+versionRange="[40,)" # Forge 40.x = 1.18.2
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.pride]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.18.2,1.19)"
+ordering="NONE"
+side="BOTH"
+
+[[mixins]]
+    config="mixins.pride.json"
