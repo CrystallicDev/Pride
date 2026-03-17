@@ -2,7 +2,7 @@
 [![MIT License](https://img.shields.io/badge/Loader-Forge-yellow)](https://choosealicense.com/licenses/mit/)
 [![MIT License](https://img.shields.io/badge/Loader-Neoforge-yellow)](https://choosealicense.com/licenses/mit/)
 
-[![version](https://img.shields.io/badge/Cristallite_mod_Collection-darkgreen)](https://google.com)
+[![version](https://img.shields.io/badge/Cristallite-Mod_Collection-darkgreen)](https://google.com)
 [![version](https://img.shields.io/badge/1.18.2-lightgreen)](https://google.com)
 [![version](https://img.shields.io/badge/1.19.2-lightblue)](https://google.com)
 [![version](https://img.shields.io/badge/1.20.x-pink)](https://google.com)
