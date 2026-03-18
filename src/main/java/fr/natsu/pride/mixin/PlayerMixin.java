@@ -4,14 +4,16 @@ import java.lang.foreign.AddressLayout;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 
-import fr.natsu.pride.combat.CombatHelper;
 import fr.natsu.pride.config.PrideConfig;
+import fr.natsu.pride.utils.CombatHelper;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -24,48 +26,64 @@ import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.phys.Vec3;
-
+import org.spongepowered.asm.mixin.injection.At;
 @Mixin(Player.class)
 public abstract class PlayerMixin {
 
-	/*
-	 * @Overwrite public void knockback(double strength, double x, double z) {
-	 * LivingEntity self = (LivingEntity)(Object)self;
-	 * 
-	 * if (self.getRandom().nextDouble() >=
-	 * self.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE)) {
-	 * 
-	 * Vec3 motion = self.getDeltaMovement();
-	 * 
-	 * double x = (double)(-Mth.sin(self.rotationYaw * (float)Math.PI / 180.0F) *
-	 * (float)i * 0.5F); double y = 0.1D; double z =
-	 * (double)(Mth.cos(self.rotationYaw * (float)Math.PI / 180.0F) * (float)i *
-	 * 0.5F));
-	 * 
-	 * Vec3 knockback = (new Vec3(x, 0.0D, z)) .normalize() .scale(strength);
-	 * 
-	 * self.setDeltaMovement( motion.x * 0.5 - knockback.x, self.isOnGround() ?
-	 * Math.min(0.4, motion.y * 0.5 + strength) : motion.y, motion.z * 0.5 -
-	 * knockback.z ); } }
-	 */
-	
+	/**
+     * Disable the attack cooldown when needed
+     * @reason Required
+     * @author Natsu91
+     * */
+	@Overwrite
 	public float getAttackStrengthScale(float f) {
 		Player self = (Player) (Object) this;
+		float attackThicker = ((PlayerAccessor)(Object)this).getAttackStrengthTicker();
 		ItemStack item = self.getMainHandItem();
 		if (item == null) return 0.0F;
 		if ((PrideConfig.isDisableAttackCooldownForAxe() && item.getItem() instanceof AxeItem) || (PrideConfig.isDisableAttackCooldownForSword() && !(item.getItem() instanceof AxeItem))) {
-			return 0.0F;
+			return 1.0F;
 		}
-		return 0.0F;
+		return Mth.clamp(((float)attackThicker + f) / self.getCurrentItemAttackStrengthDelay(), 0.0F, 1.0F);
 	}
 	
-	public void handleAttack(Entity targetEntity) {
+	@ModifyArg(
+	        method = "hurt",
+	        at = @At(
+	            value = "INVOKE",
+	            target = "Lnet/minecraft/world/entity/player/Player;actuallyHurt(Lnet/minecraft/world/damagesource/DamageSource;F)V"
+	        ),
+	        index = 1 
+	    )
+	    private float reduceParryDamage(DamageSource source, float amount) {
+	        Player self = (Player)(Object) this;
+
+	        if (!self.isBlocking()) return amount;
+	        if (!(self.getUseItem().getItem() instanceof SwordItem)) return amount;
+	        if (source.isBypassArmor()) return amount;
+
+	        if (source.getEntity() != null) {
+	        	amount = (1.0F + amount) * PrideConfig.getSwordBlockingDamageReduction();		// From MCP mappings : https://github.com/Marcelektro/MCP-919/blob/main/src/minecraft/net/minecraft/entity/player/EntityPlayer.java
+	        	return amount;
+	        }
+
+	        return amount;
+	    }
+	
+	/**
+     * Allow for custom damage and knockback calculations
+     * @reason Required
+     * @author Natsu91
+     * */
+	@Overwrite
+	public void attack(Entity targetEntity) {
 		Player self = (Player) (Object) this;
 		ItemStack item = self.getMainHandItem();
 		boolean isWeaponAxe = (item != null ? (item.getItem() instanceof AxeItem) : false);
@@ -77,7 +95,7 @@ public abstract class PlayerMixin {
 				float baseDamage = CombatHelper.getBaseDamage(self);
 				float totalDamage = CombatHelper.getTotalDamage(self, targetEntity, baseDamage);
 				//If the damage is not > 0, nothing will happen, common to both versions
-				//We calculated Critical hits early, but they are a multiplier, so it does not
+				//We calculated Critical hits early, but it is a multiplier, so it does not
 				//matter
 				if (baseDamage > 0 || totalDamage > 0) {
 					float knockBack = CombatHelper.getTotalAttackKnockback(self);
@@ -201,8 +219,8 @@ public abstract class PlayerMixin {
 	}
 	
 	
-	@Overwrite
-	public void attack(Entity target) {
+	/*
+	private void actualAttackMapped(Entity target) {
 		Player self = (Player) (Object) this;
 
 		if (target.isAttackable()) {
@@ -382,5 +400,5 @@ public abstract class PlayerMixin {
 
 			}
 		}
-	}
+	}*/
 }

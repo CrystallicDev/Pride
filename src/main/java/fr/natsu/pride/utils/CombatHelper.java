@@ -1,4 +1,4 @@
-package fr.natsu.pride.combat;
+package fr.natsu.pride.utils;
 
 import fr.natsu.pride.Pride;
 import fr.natsu.pride.config.PrideConfig;

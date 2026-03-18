@@ -6,6 +6,7 @@ public class PrideConfig {
 	public static boolean revertKnockback = false;
 	public static boolean allowSwordBlocking = false;
 	public static float swordBlockingDamageReduction = 0.5f;
+	public static int swordBlockingSuccessCooldown = 0;
 	public static boolean disableAttackCooldownForSword = false;
 	public static boolean noSweeping = false;
 	public static boolean disableAttackCooldownForAxe = false;
@@ -16,6 +17,12 @@ public class PrideConfig {
 	public static boolean isPlayWeakHitsSounds = false;
 	
 	
+	public static int getSwordBlockingSuccessCooldown() {
+		return swordBlockingSuccessCooldown;
+	}
+	public static void setSwordBlockingSuccessCooldown(int swordBlockingSuccessCooldown) {
+		PrideConfig.swordBlockingSuccessCooldown = swordBlockingSuccessCooldown;
+	}
 	public static boolean isPlayCritSounds() {
 		return isPlayCritSounds;
 	}
