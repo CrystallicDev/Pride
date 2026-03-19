@@ -1,7 +1,5 @@
 package fr.natsu.pride.mixin;
 
-import java.lang.foreign.AddressLayout;
-
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
@@ -45,7 +43,7 @@ public abstract class PlayerMixin {
 	@Overwrite
 	public float getAttackStrengthScale(float f) {
 		Player self = (Player) (Object) this;
-		float attackThicker = ((PlayerAccessor)(Object)this).getAttackStrengthTicker();
+		int attackThicker = ((PlayerAccessor)(Object)this).getAttackStrengthTicker();
 		ItemStack item = self.getMainHandItem();
 		if (item == null) return 0.0F;
 		if ((PrideConfig.isDisableAttackCooldownForAxe() && item.getItem() instanceof AxeItem) || (PrideConfig.isDisableAttackCooldownForSword() && !(item.getItem() instanceof AxeItem))) {

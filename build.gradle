@@ -78,7 +78,7 @@ afterEvaluate {
         options.compilerArgs += [
             "-AreobfTsrgFile=${tsrgFile.absolutePath}",
             "-AoutRefMapFile=${refmapFile.absolutePath}",
-            "-AmappingTypes=tsrg"
+            "-AmappingTypes=named"
         ]
     }
 }
@@ -148,9 +148,11 @@ publishing {
         }
     }
     repositories {
-        maven {
-            url "file://${project.projectDir}/mcmodsrepo"
-        }
+       maven { url = 'https://maven.minecraftforge.net' }
+       maven {
+		url = 'https://repo.spongepowered.org/repository/maven-public/'
+		content { includeGroup "org.spongepowered" }
+	  }
     }
 }
 
