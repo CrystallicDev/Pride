@@ -1,9 +1,10 @@
-package fr.natsu.pride.network;
+package com.natsu.pride.network;
 
-import fr.natsu.pride.Pride;
-import fr.natsu.pride.common.capability.IParryCapability;
-import fr.natsu.pride.common.capability.ParryCapability;
-import fr.natsu.pride.common.capability.ParryCapabilityProvider;
+import com.natsu.pride.Pride;
+import com.natsu.pride.common.capability.IParryCapability;
+import com.natsu.pride.common.capability.ParryCapability;
+import com.natsu.pride.common.capability.ParryCapabilityProvider;
+
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;

@@ -1,4 +1,4 @@
-package fr.natsu.pride.mixin;
+package com.natsu.pride.mixins;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -35,33 +35,25 @@ public class ItemMixin {
         cir.setReturnValue(InteractionResultHolder.consume(stack));
     }
     
-    @Overwrite
-	/**
-     * Allow the sword blocking to go for an infinite amount of time
-     * @reason Required
-     * @author Natsu91
-     * {@link ShieldItem}
-     * */
-    public int getUseDuration(ItemStack stack) {
-        if (!(stack.getItem() instanceof SwordItem)) {
-        	if (stack.getItem().isEdible()) {
-                return stack.getFoodProperties(null).isFastFood() ? 16 : 32;
-             } else {
-                return 0;
-             }
+    @Inject(method = "getUseDuration", at = @At("HEAD"), cancellable = true)
+    private void getUseDuration(ItemStack stack, CallbackInfoReturnable<Integer> cir) {
+        if (stack.getItem() instanceof SwordItem) {
+            cir.setReturnValue(72000);
+            return;
         }
-        return 72000; // comme en 1.8, infini
+        if (stack.getItem().isEdible()) {
+            cir.setReturnValue(stack.getFoodProperties(null).isFastFood() ? 16 : 32);
+            return;
+        }
+        cir.setReturnValue(0);
     }
-	
-	
-    @Overwrite
-    /**
-     * Allow the sword to block like in pre 1.9
-     * @reason Required
-     * @author Natsu91
-     * */
-    public UseAnim getUseAnimation(ItemStack stack) {
-        if (!(stack.getItem() instanceof SwordItem)) return stack.getItem().isEdible() ? UseAnim.EAT : UseAnim.NONE;
-        return UseAnim.BLOCK;
+
+    @Inject(method = "getUseAnimation", at = @At("HEAD"), cancellable = true)
+    private void getUseAnimation(ItemStack stack, CallbackInfoReturnable<UseAnim> cir) {
+        if (stack.getItem() instanceof SwordItem) {
+            cir.setReturnValue(UseAnim.BLOCK);
+            return;
+        }
+        cir.setReturnValue(stack.getItem().isEdible() ? UseAnim.EAT : UseAnim.NONE);
     }
 }

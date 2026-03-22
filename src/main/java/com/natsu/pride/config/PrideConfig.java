@@ -1,16 +1,16 @@
-package fr.natsu.pride.config;
+package com.natsu.pride.config;
 
 public class PrideConfig {
 
-	public static boolean revertDamageLogic = false;
-	public static boolean revertKnockback = false;
-	public static boolean allowSwordBlocking = false;
-	public static float swordBlockingDamageReduction = 0.5f;
+	public static boolean revertDamageLogic = true;
+	public static boolean revertKnockback = true;
+	public static boolean allowSwordBlocking = true;
+	public static float swordBlockingDamageReduction = 0.0f;
 	public static int swordBlockingSuccessCooldown = 0;
-	public static boolean disableAttackCooldownForSword = false;
-	public static boolean noSweeping = false;
+	public static boolean disableAttackCooldownForSword = true;
+	public static boolean noSweeping = true;
 	public static boolean disableAttackCooldownForAxe = false;
-	public static boolean revertFishingRod = false;
+	public static boolean revertFishingRod = true;
 	public static boolean shieldsOnlyBlockProjectiles = false;
 	public static boolean isPlayCritSounds = false;
 	public static boolean isPlayStrongHitsSounds = false;

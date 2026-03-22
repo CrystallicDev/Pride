@@ -1,17 +1,20 @@
-package fr.natsu.pride.mixin;
+package com.natsu.pride.mixins;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import fr.natsu.pride.common.capability.ParryCapabilityProvider;
-import fr.natsu.pride.config.PrideConfig;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.natsu.pride.common.capability.ParryCapabilityProvider;
+import com.natsu.pride.config.PrideConfig;
 
 import org.spongepowered.asm.mixin.injection.At;
 
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.SwordItem;
 
 @Mixin(LivingEntity.class)
 public class LivingEntityMixin {

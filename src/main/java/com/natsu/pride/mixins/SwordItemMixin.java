@@ -1,4 +1,4 @@
-package fr.natsu.pride.mixin;
+package com.natsu.pride.mixins;
 
 import java.lang.System.Logger.Level;
 

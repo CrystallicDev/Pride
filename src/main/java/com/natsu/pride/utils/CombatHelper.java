@@ -1,7 +1,8 @@
-package fr.natsu.pride.utils;
+package com.natsu.pride.utils;
 
-import fr.natsu.pride.Pride;
-import fr.natsu.pride.config.PrideConfig;
+import com.natsu.pride.Pride;
+import com.natsu.pride.config.PrideConfig;
+
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;

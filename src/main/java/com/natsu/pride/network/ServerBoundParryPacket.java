@@ -1,9 +1,10 @@
-package fr.natsu.pride.network;
+package com.natsu.pride.network;
 
 import java.util.function.Supplier;
 
-import fr.natsu.pride.common.capability.ParryCapability;
-import fr.natsu.pride.common.capability.ParryCapabilityProvider;
+import com.natsu.pride.common.capability.ParryCapability;
+import com.natsu.pride.common.capability.ParryCapabilityProvider;
+
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;

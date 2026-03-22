@@ -1,7 +1,8 @@
-package fr.natsu.pride.client.events;
+package com.natsu.pride.client.events;
 
-import fr.natsu.pride.network.NetworkEvents;
-import fr.natsu.pride.network.ServerBoundParryPacket;
+import com.natsu.pride.network.NetworkEvents;
+import com.natsu.pride.network.ServerBoundParryPacket;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.vehicle.Minecart;
 import net.minecraft.world.item.ItemStack;

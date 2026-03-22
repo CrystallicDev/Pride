@@ -1,11 +1,16 @@
-package fr.natsu.pride.mixin;
+package com.natsu.pride.mixins;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import fr.natsu.pride.config.PrideConfig;
-import fr.natsu.pride.utils.CombatHelper;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.natsu.pride.config.PrideConfig;
+import com.natsu.pride.utils.CombatHelper;
+
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.server.level.ServerLevel;
@@ -32,56 +37,52 @@ import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 @Mixin(Player.class)
 public abstract class PlayerMixin {
 
-	/**
-     * Disable the attack cooldown when needed
-     * @reason Required
-     * @author Natsu91
-     * */
-	@Overwrite
-	public float getAttackStrengthScale(float f) {
-		Player self = (Player) (Object) this;
-		int attackThicker = ((PlayerAccessor)(Object)this).getAttackStrengthTicker();
-		ItemStack item = self.getMainHandItem();
-		if (item == null) return 0.0F;
-		if ((PrideConfig.isDisableAttackCooldownForAxe() && item.getItem() instanceof AxeItem) || (PrideConfig.isDisableAttackCooldownForSword() && !(item.getItem() instanceof AxeItem))) {
-			return 1.0F;
-		}
-		return Mth.clamp(((float)attackThicker + f) / self.getCurrentItemAttackStrengthDelay(), 0.0F, 1.0F);
+	private boolean isReducingParryDamage = false;
+	
+	@Inject(method = "getAttackStrengthScale", at = @At("HEAD"), cancellable = true)
+	public void getAttackStrengthScale(float f, CallbackInfoReturnable<Float> cir) {
+	    Player self = (Player) (Object) this;
+	    int attackTicker = ((PlayerAccessor)(Object)this).getAttackStrengthTicker();
+	    ItemStack item = self.getMainHandItem();
+	    if (item == null) {
+	        cir.setReturnValue(0.0F);
+	        return;
+	    }
+	    if ((PrideConfig.isDisableAttackCooldownForAxe() && item.getItem() instanceof AxeItem) ||
+	        (PrideConfig.isDisableAttackCooldownForSword() && !(item.getItem() instanceof AxeItem))) {
+	        cir.setReturnValue(1.0F);
+	        return;
+	    }
+	    cir.setReturnValue(Mth.clamp(((float)attackTicker + f) / self.getCurrentItemAttackStrengthDelay(), 0.0F, 1.0F));
 	}
 	
-	@ModifyArg(
-	        method = "hurt",
-	        at = @At(
-	            value = "INVOKE",
-	            target = "Lnet/minecraft/world/entity/player/Player;actuallyHurt(Lnet/minecraft/world/damagesource/DamageSource;F)V"
-	        ),
-	        index = 1 
-	    )
-	    private float reduceParryDamage(DamageSource source, float amount) {
-	        Player self = (Player)(Object) this;
 
-	        if (!self.isBlocking()) return amount;
-	        if (!(self.getUseItem().getItem() instanceof SwordItem)) return amount;
-	        if (source.isBypassArmor()) return amount;
+    @Inject(method = "actuallyHurt", at = @At("HEAD"), cancellable = true)
+    private void reduceParryDamage(DamageSource source, float amount, CallbackInfo ci) {
+        if (isReducingParryDamage) return;
 
-	        if (source.getEntity() != null) {
-	        	amount = (1.0F + amount) * PrideConfig.getSwordBlockingDamageReduction();		// From MCP mappings : https://github.com/Marcelektro/MCP-919/blob/main/src/minecraft/net/minecraft/entity/player/EntityPlayer.java
-	        	return amount;
-	        }
+        Player self = (Player)(Object) this;
 
-	        return amount;
-	    }
+        if (!self.isBlocking()) return;
+        if (!(self.getUseItem().getItem() instanceof SwordItem)) return;
+        if (source.isBypassArmor()) return;
+        if (source.getEntity() == null) return;
+
+        amount = (1.0F + amount) * PrideConfig.getSwordBlockingDamageReduction();
+        
+        isReducingParryDamage = true;
+        ((PlayerAccessor)(Object)self).invokeActuallyHurt(source, amount);
+        isReducingParryDamage = false;
+        
+        ci.cancel();
+    }
 	
-	/**
-     * Allow for custom damage and knockback calculations
-     * @reason Required
-     * @author Natsu91
-     * */
-	@Overwrite
-	public void attack(Entity targetEntity) {
+	@Inject(method = "attack", at = @At("HEAD"), cancellable = true)
+	public void attack(Entity targetEntity, CallbackInfo ci) {
 		Player self = (Player) (Object) this;
 		ItemStack item = self.getMainHandItem();
 		boolean isWeaponAxe = (item != null ? (item.getItem() instanceof AxeItem) : false);
@@ -214,6 +215,7 @@ public abstract class PlayerMixin {
 				}
 			}
 		}
+		ci.cancel();
 	}
 	
 	

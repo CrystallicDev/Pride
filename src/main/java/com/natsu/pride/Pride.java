@@ -1,4 +1,4 @@
-package fr.natsu.pride;
+package com.natsu.pride;
 
 import com.llamalad7.mixinextras.MixinExtrasBootstrap;
 

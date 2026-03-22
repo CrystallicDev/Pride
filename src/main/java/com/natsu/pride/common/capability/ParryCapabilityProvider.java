@@ -1,4 +1,4 @@
-package fr.natsu.pride.common.capability;
+package com.natsu.pride.common.capability;
 
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
