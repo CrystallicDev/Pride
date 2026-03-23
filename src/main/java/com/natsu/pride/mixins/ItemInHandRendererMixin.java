@@ -1,4 +1,4 @@
-package fr.natsu.pride.mixin;
+package com.natsu.pride.mixins;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -8,8 +8,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
 
-import fr.natsu.pride.common.capability.ParryCapabilityProvider;
-import fr.natsu.pride.config.PrideConfig;
 
 import org.spongepowered.asm.mixin.injection.At;
 
@@ -28,16 +26,15 @@ import net.minecraft.world.item.SwordItem;
 public class ItemInHandRendererMixin {
 
 	@Inject(method = "renderArmWithItem", at = @At("HEAD"))
-	private void applyBlockingTransform(AbstractClientPlayer player, float partialTick, float pitch, HumanoidArm arm,
+	private void applyBlockingTransform(AbstractClientPlayer player, float partialTick, float pitch, InteractionHand hand,
 			float aimPitch, ItemStack stack, float equipProgress, PoseStack poseStack, MultiBufferSource buffer,
 			int combinedLight, CallbackInfo ci) {
 		if (player.isUsingItem() && player.getUseItem().getItem() instanceof SwordItem
-				&& player.getUsedItemHand() == (arm == HumanoidArm.RIGHT ? InteractionHand.MAIN_HAND
-						: InteractionHand.OFF_HAND)) {
+				&& player.getUsedItemHand() == (hand)) {
 
 			poseStack.mulPose(Vector3f.XP.rotationDegrees(-10f));
-			poseStack.mulPose(Vector3f.YP.rotationDegrees(arm == HumanoidArm.RIGHT ? -35f : 35f));
-			poseStack.translate(arm == HumanoidArm.RIGHT ? -0.15 : 0.15, 0.1, 0.0);
+			poseStack.mulPose(Vector3f.YP.rotationDegrees(hand == InteractionHand.MAIN_HAND ? -35f : 35f));
+			poseStack.translate(hand == InteractionHand.MAIN_HAND ? -0.15 : 0.15, 0.1, 0.0);
 		}
 	}
 	

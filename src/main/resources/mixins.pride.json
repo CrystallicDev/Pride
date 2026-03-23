@@ -9,7 +9,8 @@
 		"PlayerAccessor",
 		"PlayerMixin",
 		"LivingEntityMixin",
-		"ItemMixin"
+		"ItemMixin",
+		"ItemInHandRendererMixin"
     ],
     "client": [],
     "server": [],
