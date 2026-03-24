@@ -1,7 +1,7 @@
 package com.natsu.pride.utils;
 
 import com.natsu.pride.Pride;
-import com.natsu.pride.config.PrideConfig;
+import com.natsu.pride.config.ServerConfig;
 
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
@@ -26,7 +26,7 @@ public class CombatHelper {
 	public static float getBaseDamage(Player player) {
 		ItemStack item = player.getMainHandItem();
 		boolean isWeaponAxe = (item != null ? (item.getItem() instanceof AxeItem) : false);
-		if (PrideConfig.isRevertDamageLogic() && isWeaponAxe) {
+		if (ServerConfig.REVERT_DAMAGE_LOGIC.get() && isWeaponAxe) {
 			//Nerfing axe damage by 2, should be enough to rebalance damage overall
 			return (float) player.getAttributeValue(Attributes.ATTACK_DAMAGE) - 2;
 		}
@@ -42,7 +42,7 @@ public class CombatHelper {
 		float base = (float) player.getAttributeValue(Attributes.ATTACK_KNOCKBACK);
 		boolean isAttackTimerOk = player.getAttackStrengthScale(0.5F) > 0.9F;			// getAttackStrengthScale sShould be bypassed by a Mixin in PlayerMixin using Pride's authority
 		
-		if (PrideConfig.isRevertKnockback()) {
+		if (ServerConfig.REVERT_KNOCKBACK.get()) {
 			//1.8.9 knockback method. By default, it only counts the weapon's knockback, the
 			// knockback enchants, and whether or not the attacker is sprinting.
 			float attackKnockback = (float) player.getAttributeValue(Attributes.ATTACK_KNOCKBACK);
@@ -69,7 +69,7 @@ public class CombatHelper {
 	 * Returns the total attack damage of an {@link Player} depending on {@link Pride}'s config
 	 * */
 	public static float getTotalDamage(Player player, Entity target, float baseDamage) {
-		if (PrideConfig.isRevertDamageLogic()) {
+		if (ServerConfig.REVERT_DAMAGE_LOGIC.get()) {
 			// Calculate the damage based on mappings from 1.8.9. 
 			float additionalDamage;
 			if (target instanceof LivingEntity) {
@@ -122,14 +122,14 @@ public class CombatHelper {
 	}
 	
 	public static boolean isCritical(Player player, Entity target) {
-		boolean isAttackTimerOk = player.getAttackStrengthScale(0.5F) > 0.9F;			// getAttackStrengthScale sShould be bypassed by a Mixin in PlayerMixin using Pride's authority
+		boolean isAttackTimerOk = player.getAttackStrengthScale(0.5F) > 0.9F;			// getAttackStrengthScale should be bypassed by a Mixin in PlayerMixin using Pride's authority
 		return isAttackTimerOk && player.fallDistance > 0.0F && !player.isOnGround()
 				&& !player.onClimbable() && !player.isInWater() && !player.hasEffect(MobEffects.BLINDNESS)
 				&& !player.isPassenger() && target instanceof LivingEntity;
 	}
 
 	public static boolean canAttacKSweep(Player player, Entity target, float attackStrengthScale) {
-		if (PrideConfig.isNoSweeping()) return false;
+		if (ServerConfig.DISABLE_SWEEPING_ATTACKS.get()) return false;
 		boolean isAttackTimerOk = attackStrengthScale > 0.9F;
 		
 		boolean sprintAndAttackTimerOk = player.isSprinting() && isAttackTimerOk;
@@ -148,17 +148,17 @@ public class CombatHelper {
 	public static void playSounds(Player self, Entity targetEntity, boolean canSweep, boolean isCriticalHit) {
 		boolean isAttackTimerOk = self.getAttackStrengthScale(0.5F) > 0.9F;
 		
-		if (isCriticalHit && PrideConfig.isPlayCritSounds()) {
+		if (isCriticalHit && ServerConfig.PLAY_CRIT_SOUNDS.get()) {
 			self.level.playSound((Player) null, self.getX(), self.getY(), self.getZ(),
 					SoundEvents.PLAYER_ATTACK_CRIT, self.getSoundSource(), 1.0F, 1.0F);
 			self.crit(targetEntity);
 		}
 
 		if (!isCriticalHit && !canSweep) {
-			if (isAttackTimerOk && PrideConfig.isPlayStrongHitsSounds()) {
+			if (isAttackTimerOk && ServerConfig.PLAY_STRONG_HIT_SOUNDS.get()) {
 				self.level.playSound((Player) null, self.getX(), self.getY(), self.getZ(),
 						SoundEvents.PLAYER_ATTACK_STRONG, self.getSoundSource(), 1.0F, 1.0F);
-			} else if (PrideConfig.isPlayWeakHitsSounds()){
+			} else if (ServerConfig.PLAY_WEAK_HIT_SOUNDS.get()){
 				self.level.playSound((Player) null, self.getX(), self.getY(), self.getZ(),
 						SoundEvents.PLAYER_ATTACK_WEAK, self.getSoundSource(), 1.0F, 1.0F);
 			}
@@ -166,8 +166,13 @@ public class CombatHelper {
 	}
 
 	public static void knockbackOnHit(Player self, Entity targetEntity, float knockBack) {
-		if (PrideConfig.isRevertKnockback()) {
-			
+		if (ServerConfig.REVERT_KNOCKBACK.get()) {
+			if (knockBack > 0) {
+				double dx = (double) (-Mth.sin(self.getYRot() * (float) Math.PI / 180.0F) * (float) knockBack * 0.5F);
+				double dy = 0.1D;
+				double dz = (double) (Mth.cos(self.getYRot() * (float) Math.PI / 180.0F) * (float) knockBack * 0.5F);
+				targetEntity.setDeltaMovement(targetEntity.getDeltaMovement().add(dx, dy, dz));
+			}
 		} else 
 			if (targetEntity instanceof LivingEntity) {
 				((LivingEntity) targetEntity).knockback((double) ((float) knockBack * 0.5F),
@@ -183,7 +188,7 @@ public class CombatHelper {
 	}
 
 	public static void foodExhaustion(Player self) {
-		if (PrideConfig.isRevertDamageLogic()) {
+		if (ServerConfig.REVERT_DAMAGE_LOGIC.get()) {
 			self.causeFoodExhaustion(0.3F);
 		} else {
 			self.causeFoodExhaustion(0.1F);

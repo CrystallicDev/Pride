@@ -26,19 +26,19 @@ public class ItemMixin {
     )
     private void onUse(Level level, Player player, InteractionHand hand,
                        CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
-        ItemStack stack = player.getItemInHand(hand);
+        /*ItemStack stack = player.getItemInHand(hand);
         if (!(stack.getItem() instanceof SwordItem)) return;
         ItemStack offhand = player.getItemInHand(InteractionHand.OFF_HAND);
         if (offhand.getItem() instanceof ShieldItem) return;
 
         player.startUsingItem(hand);
-        cir.setReturnValue(InteractionResultHolder.consume(stack));
+        cir.setReturnValue(InteractionResultHolder.consume(stack));*/
     }
     
     @Inject(method = "getUseDuration", at = @At("HEAD"), cancellable = true)
     private void getUseDuration(ItemStack stack, CallbackInfoReturnable<Integer> cir) {
         if (stack.getItem() instanceof SwordItem) {
-            cir.setReturnValue(72000);
+            cir.setReturnValue(0);			// @Test
             return;
         }
         if (stack.getItem().isEdible()) {

@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import com.natsu.pride.config.PrideConfig;
+import com.natsu.pride.config.ServerConfig;
 import com.natsu.pride.utils.CombatHelper;
 
 import net.minecraft.core.particles.ParticleTypes;
@@ -52,8 +52,8 @@ public abstract class PlayerMixin {
 	        cir.setReturnValue(0.0F);
 	        return;
 	    }
-	    if ((PrideConfig.isDisableAttackCooldownForAxe() && item.getItem() instanceof AxeItem) ||
-	        (PrideConfig.isDisableAttackCooldownForSword() && !(item.getItem() instanceof AxeItem))) {
+	    if ((ServerConfig.DISABLE_AXE_ATTACK_COOLDOWN.get() && item.getItem() instanceof AxeItem) ||
+	        (ServerConfig.DISABLE_SWORD_ATTACK_COOLDOWN.get() && !(item.getItem() instanceof AxeItem))) {
 	        cir.setReturnValue(1.0F);
 	        return;
 	    }
@@ -72,7 +72,7 @@ public abstract class PlayerMixin {
         if (source.isBypassArmor()) return;
         if (source.getEntity() == null) return;
 
-        amount = (1.0F + amount) * PrideConfig.getSwordBlockingDamageReduction();
+        amount = (1.0F + amount) * (1 - ServerConfig.BLOCKING_DAMAGE_REDUCTION.get().floatValue());
         
         isReducingParryDamage = true;
         ((PlayerAccessor)(Object)self).invokeActuallyHurt(source, amount);
@@ -84,6 +84,7 @@ public abstract class PlayerMixin {
 	@Inject(method = "attack", at = @At("HEAD"), cancellable = true)
 	public void attack(Entity targetEntity, CallbackInfo ci) {
 		Player self = (Player) (Object) this;
+		if (!net.minecraftforge.common.ForgeHooks.onPlayerAttackTarget(self, targetEntity)) return;		// Keeping forge events
 		ItemStack item = self.getMainHandItem();
 		boolean isWeaponAxe = (item != null ? (item.getItem() instanceof AxeItem) : false);
 		boolean isWeaponSword = (item != null ? (item.getItem() instanceof SwordItem) : false);
@@ -401,4 +402,141 @@ public abstract class PlayerMixin {
 			}
 		}
 	}*/
+	
+	/* Mapped from MCP mappings
+	public void attackTargetEntityWithCurrentItem(Entity targetEntity)
+    {
+        if (targetEntity.canAttackWithItem())
+        {
+            if (!targetEntity.hitByEntity(this))
+            {
+                float meleeBaseDamage = (float)this.getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
+                int baseKnockback = 0;
+                float additionalDamage = 0.0F;
+
+                if (targetEntity instanceof EntityLivingBase)
+                {
+                    additionalDamage = EnchantmentHelper.getModifierForCreature(this.getHeldItem(), ((EntityLivingBase)targetEntity).getCreatureAttribute());
+                }
+                else
+                {
+                    additionalDamage = EnchantmentHelper.getModifierForCreature(this.getHeldItem(), EnumCreatureAttribute.UNDEFINED);
+                }
+
+                baseKnockback = baseKnockback + EnchantmentHelper.getKnockbackModifier(this);
+
+                if (this.isSprinting())
+                {
+                    ++baseKnockback;
+                }
+
+                if (meleeBaseDamage > 0.0F || additionalDamage > 0.0F)
+                {
+                    boolean isSprinting = this.fallDistance > 0.0F && !this.onGround && !this.isOnLadder() && !this.isInWater() && !this.isPotionActive(Potion.blindness) && this.ridingEntity == null && targetEntity instanceof EntityLivingBase;
+
+                    if (isSprinting && meleeBaseDamage > 0.0F)
+                    {
+                        meleeBaseDamage *= 1.5F;
+                    }
+
+                    meleeBaseDamage = meleeBaseDamage + additionalDamage;
+                    boolean hasFireAspect = false;
+                    int fireAspectLevel = EnchantmentHelper.getFireAspectModifier(this);
+
+                    if (targetEntity instanceof EntityLivingBase && fireAspectLevel > 0 && !targetEntity.isBurning())
+                    {
+                        hasFireAspect = true;
+                        targetEntity.setFire(1);
+                    }
+
+                    double d0 = targetEntity.motionX;
+                    double d1 = targetEntity.motionY;
+                    double d2 = targetEntity.motionZ;
+                    boolean canAttackEntity = targetEntity.attackEntityFrom(DamageSource.causePlayerDamage(this), meleeBaseDamage);
+
+                    if (canAttackEntity)
+                    {
+                        if (baseKnockback > 0)
+                        {
+                            targetEntity.addVelocity((double)(-MathHelper.sin(this.rotationYaw * (float)Math.PI / 180.0F) * (float)baseKnockback * 0.5F), 0.1D, (double)(MathHelper.cos(this.rotationYaw * (float)Math.PI / 180.0F) * (float)baseKnockback * 0.5F));
+                            this.motionX *= 0.6D;
+                            this.motionZ *= 0.6D;
+                            this.setSprinting(false);
+                        }
+
+                        if (targetEntity instanceof EntityPlayerMP && targetEntity.velocityChanged)
+                        {
+                            ((EntityPlayerMP)targetEntity).playerNetServerHandler.sendPacket(new S12PacketEntityVelocity(targetEntity));
+                            targetEntity.velocityChanged = false;
+                            targetEntity.motionX = d0;
+                            targetEntity.motionY = d1;
+                            targetEntity.motionZ = d2;
+                        }
+
+                        if (isSprinting)
+                        {
+                            this.onCriticalHit(targetEntity);
+                        }
+
+                        if (additionalDamage > 0.0F)
+                        {
+                            this.onEnchantmentCritical(targetEntity);
+                        }
+
+                        if (meleeBaseDamage >= 18.0F)
+                        {
+                            this.triggerAchievement(AchievementList.overkill);
+                        }
+
+                        this.setLastAttacker(targetEntity);
+
+                        if (targetEntity instanceof EntityLivingBase)
+                        {
+                            EnchantmentHelper.applyThornEnchantments((EntityLivingBase)targetEntity, this);
+                        }
+
+                        EnchantmentHelper.applyArthropodEnchantments(this, targetEntity);
+                        ItemStack itemstack = this.getCurrentEquippedItem();
+                        Entity entity = targetEntity;
+
+                        if (targetEntity instanceof EntityDragonPart)
+                        {
+                            IEntityMultiPart ientitymultipart = ((EntityDragonPart)targetEntity).entityDragonObj;
+
+                            if (ientitymultipart instanceof EntityLivingBase)
+                            {
+                                entity = (EntityLivingBase)ientitymultipart;
+                            }
+                        }
+
+                        if (itemstack != null && entity instanceof EntityLivingBase)
+                        {
+                            itemstack.hitEntity((EntityLivingBase)entity, this);
+
+                            if (itemstack.stackSize <= 0)
+                            {
+                                this.destroyCurrentEquippedItem();
+                            }
+                        }
+
+                        if (targetEntity instanceof EntityLivingBase)
+                        {
+                            this.addStat(StatList.damageDealtStat, Math.round(meleeBaseDamage * 10.0F));
+
+                            if (fireAspectLevel > 0)
+                            {
+                                targetEntity.setFire(fireAspectLevel * 4);
+                            }
+                        }
+
+                        this.addExhaustion(0.3F);
+                    }
+                    else if (hasFireAspect)
+                    {
+                        targetEntity.extinguish();
+                    }
+                }
+            }
+        }
+    }*/
 }

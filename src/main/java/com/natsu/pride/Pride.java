@@ -11,7 +11,6 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 @Mod(Pride.MODID)
 public class Pride {
 	public static final String MODID = "pride";
-
     public Pride() {
     	IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
     	MixinExtrasBootstrap.init();
@@ -21,4 +20,5 @@ public class Pride {
     public static void onCommonSetup(FMLCommonSetupEvent event) {
     	
     }
+
 }

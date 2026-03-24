@@ -25,7 +25,7 @@ import net.minecraft.world.item.SwordItem;
 @Mixin(ItemInHandRenderer.class)
 public class ItemInHandRendererMixin {
 
-	@Inject(method = "renderArmWithItem", at = @At("HEAD"))
+	/*@Inject(method = "renderArmWithItem", at = @At("HEAD"))
 	private void applyBlockingTransform(AbstractClientPlayer player, float partialTick, float pitch, InteractionHand hand,
 			float aimPitch, ItemStack stack, float equipProgress, PoseStack poseStack, MultiBufferSource buffer,
 			int combinedLight, CallbackInfo ci) {
@@ -36,6 +36,9 @@ public class ItemInHandRendererMixin {
 			poseStack.mulPose(Vector3f.YP.rotationDegrees(hand == InteractionHand.MAIN_HAND ? -35f : 35f));
 			poseStack.translate(hand == InteractionHand.MAIN_HAND ? -0.15 : 0.15, 0.1, 0.0);
 		}
-	}
+		
+		
+		
+	}*/
 	
 }
