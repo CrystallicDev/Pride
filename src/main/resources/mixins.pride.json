@@ -10,7 +10,8 @@
 		"PlayerMixin",
 		"LivingEntityMixin",
 		"ItemMixin",
-		"ItemInHandRendererMixin"
+		"ItemInHandRendererMixin",
+		"MixinHumanoidModel"
     ],
     "client": [],
     "server": [],

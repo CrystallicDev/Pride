@@ -38,14 +38,14 @@ public class ItemMixin {
     @Inject(method = "getUseDuration", at = @At("HEAD"), cancellable = true)
     private void getUseDuration(ItemStack stack, CallbackInfoReturnable<Integer> cir) {
         if (stack.getItem() instanceof SwordItem) {
-            cir.setReturnValue(0);			// @Test
+        	System.out.println("SWORD BLOCK !");
+            cir.setReturnValue(7200);			
             return;
         }
         if (stack.getItem().isEdible()) {
             cir.setReturnValue(stack.getFoodProperties(null).isFastFood() ? 16 : 32);
             return;
         }
-        cir.setReturnValue(0);
     }
 
     @Inject(method = "getUseAnimation", at = @At("HEAD"), cancellable = true)

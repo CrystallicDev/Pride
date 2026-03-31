@@ -18,6 +18,8 @@ public class ServerConfig {
 	public static final ForgeConfigSpec.BooleanValue PLAY_CRIT_SOUNDS;
 	public static final ForgeConfigSpec.BooleanValue PLAY_STRONG_HIT_SOUNDS;
 	public static final ForgeConfigSpec.BooleanValue PLAY_WEAK_HIT_SOUNDS;
+
+	public static final ForgeConfigSpec.BooleanValue CHANGE_BODY_RENDER;
 	
 	static {
 		ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
@@ -58,6 +60,10 @@ public class ServerConfig {
 		PLAY_WEAK_HIT_SOUNDS = builder
 				.comment("Disable the sound for weak hits.")
 				.define("disableWeakHitSounds", true);
+		
+		CHANGE_BODY_RENDER = builder
+				.comment("Change the player body rotation to match that of 1.8.9")
+				.define("changeBodyRender", true);
 
 		builder.pop();
 		SPEC = builder.build();
