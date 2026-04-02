@@ -8,7 +8,6 @@
         "FishHookMixin",
 		"PlayerAccessor",
 		"PlayerMixin",
-		"LivingEntityMixin",
 		"ItemMixin",
 		"ItemInHandRendererMixin",
 		"MixinHumanoidModel"
