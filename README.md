@@ -1,5 +1,6 @@
 <div align="center">
 
+![pride_logo](https://cdn.modrinth.com/data/cached_images/079cd4e02cf12de8c4da920859fb3cdb1ca1f3f6.png)
 # Pride
 
 [![Forge](https://img.shields.io/badge/Loader-Forge-darkgreen)](https://minecraftforge.net/)
