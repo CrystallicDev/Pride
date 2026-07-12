@@ -24,11 +24,8 @@ public class CombatHelper {
 	 * Returns the base damage of an {@link Player} depending on {@link Pride}'s config
 	 * */
 	public static float getBaseDamage(Player player) {
-		boolean isWeaponAxe = player.getMainHandItem().getItem() instanceof AxeItem;
-		if (ServerConfig.DISABLE_AXE_ATTACK_COOLDOWN.get() && isWeaponAxe) {
-			//Nerfing axe damage by 2, should be enough to rebalance damage overall
-			return (float) player.getAttributeValue(Attributes.ATTACK_DAMAGE) - 2;
-		}
+		// Le -2 des haches est porté par leur modificateur d'attribut (AxeAttributeHandler),
+		// donc déjà pris en compte ici et affiché dans le tooltip.
 		return (float) player.getAttributeValue(Attributes.ATTACK_DAMAGE);
 	}
 	
@@ -66,13 +63,21 @@ public class CombatHelper {
 	 * */
 	public static float getTotalDamage(Player player, Entity target, float baseDamage) {
 		if (ServerConfig.REVERT_DAMAGE_LOGIC.get()) {
-			// Calculate the damage based on mappings from 1.8.9. 
+			// Calculate the damage based on mappings from 1.8.9.
 			float additionalDamage;
 			if (target instanceof LivingEntity) {
 				additionalDamage = EnchantmentHelper.getDamageBonus(player.getMainHandItem(),
 						((LivingEntity) target).getMobType());
 			} else {
 				additionalDamage = EnchantmentHelper.getDamageBonus(player.getMainHandItem(), MobType.UNDEFINED);
+			}
+			// Les haches gardent le délai des coups (dégâts réduits si on frappe trop tôt),
+			// même en combat 1.8 — sauf si leur cooldown est explicitement désactivé.
+			if (player.getMainHandItem().getItem() instanceof AxeItem
+					&& !ServerConfig.DISABLE_AXE_ATTACK_COOLDOWN.get()) {
+				float attackStrengthScale = player.getAttackStrengthScale(0.5F);
+				baseDamage *= 0.2F + attackStrengthScale * attackStrengthScale * 0.8F;
+				additionalDamage *= attackStrengthScale;
 			}
 			//Slight change in the Critical Hits detection, to use forge's damage modifier hook
 			boolean isCriticalHit = isCritical(player, target);
