@@ -43,8 +43,7 @@ public abstract class PlayerMixin {
 
 	private boolean isReducingParryDamage = false;
 
-	// Drop depuis l'inventaire : Player.drop swing côté client. En jeu (touche Q)
-	// c'est MinecraftMixin qui gère ; ici on couvre le chemin ClickType.THROW.
+	// pas de swing en droppant depuis l'inventaire
 	@WrapOperation(method = "drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;",
 			at = @At(value = "INVOKE",
 					target = "Lnet/minecraft/world/entity/player/Player;swing(Lnet/minecraft/world/InteractionHand;)V"))
@@ -53,8 +52,7 @@ public abstract class PlayerMixin {
 		original.call(instance, hand);
 	}
 
-	// La nage (pose horizontale rapide, 1.13+) n'existe pas en 1.8.9 : on force
-	// l'état de nage à false, le joueur reste droit et lent sous l'eau.
+	// pas de nage (1.8.9)
 	@Inject(method = "updateSwimming", at = @At("HEAD"), cancellable = true)
 	private void preventSwimming(CallbackInfo ci) {
 		if (!ServerConfig.loaded() || !ServerConfig.DISABLE_SWIMMING.get()) return;
@@ -71,7 +69,6 @@ public abstract class PlayerMixin {
 	        (ServerConfig.DISABLE_SWORD_ATTACK_COOLDOWN.get() && !(item.getItem() instanceof AxeItem))) {
 	        cir.setReturnValue(1.0F);
 	    }
-	    // sinon : laisser la logique vanilla calculer le cooldown normalement
 	}
 	
 
@@ -101,8 +98,7 @@ public abstract class PlayerMixin {
 	public void attack(Entity targetEntity, CallbackInfo ci) {
 		Player self = (Player) (Object) this;
 
-		// pendant un blocage à l'épée, le joueur peut swinguer (animation) mais
-		// ne porte aucun vrai coup
+		// en bloquant : swing autorisé, mais pas de vrai coup
 		if (ServerConfig.loaded() && ServerConfig.ALLOW_SWORD_BLOCKING.get()
 				&& self.isUsingItem() && self.getUseItem().getItem() instanceof SwordItem) {
 			ci.cancel();
@@ -110,8 +106,6 @@ public abstract class PlayerMixin {
 		}
 
 		if (!net.minecraftforge.common.ForgeHooks.onPlayerAttackTarget(self, targetEntity)) {
-			// event Forge annulé : on annule aussi la méthode vanilla, sinon l'attaque
-			// originale s'exécuterait quand même derrière nous
 			ci.cancel();
 			return;
 		}

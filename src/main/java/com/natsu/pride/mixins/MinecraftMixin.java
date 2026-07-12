@@ -17,12 +17,7 @@ import net.minecraft.world.item.SwordItem;
 @Mixin(Minecraft.class)
 public class MinecraftMixin {
 
-	/**
-	 * Swing visible pendant le blocage à l'épée : vanilla vide les clics d'attaque
-	 * sans rien faire quand un item est en cours d'utilisation. On les consomme nous-
-	 * mêmes pour ne jouer QUE l'animation de bras — aucune attaque ni minage n'est
-	 * déclenché (on n'appelle jamais startAttack/continueDestroyBlock).
-	 */
+	// swing visible en bloquant : on consomme les clics d'attaque pour l'anim seule
 	@Inject(method = "handleKeybinds", at = @At("HEAD"))
 	private void swingWhileBlocking(CallbackInfo ci) {
 		if (!ServerConfig.loaded() || !ServerConfig.ALLOW_SWORD_BLOCKING.get()) return;
@@ -35,7 +30,7 @@ public class MinecraftMixin {
 		}
 	}
 
-	/** En 1.8.9, jeter un item (Q en jeu) ne déclenche pas d'animation de swing. */
+	// pas de swing en droppant un item (Q)
 	@WrapOperation(method = "handleKeybinds",
 			at = @At(value = "INVOKE",
 					target = "Lnet/minecraft/client/player/LocalPlayer;swing(Lnet/minecraft/world/InteractionHand;)V"))

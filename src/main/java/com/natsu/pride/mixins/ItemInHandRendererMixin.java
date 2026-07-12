@@ -24,13 +24,6 @@ import net.minecraft.world.item.MilkBucketItem;
 import net.minecraft.world.item.SolidBucketItem;
 import net.minecraft.world.item.SwordItem;
 
-/**
- * - Pose de blocage 1.8.9 en première personne (angles du transform "blocking"
- *   des modèles d'épée 1.8), avec le swing d'attaque visible pendant le blocage
- *   comme dans le ItemRenderer 1.8.9 ("blocked and attacking").
- * - Suppression de l'animation de re-équipement des seaux (remplir / vider un
- *   seau ne fait plus descendre l'item, comme en 1.8.9).
- */
 @Mixin(ItemInHandRenderer.class)
 public class ItemInHandRendererMixin {
 
@@ -49,7 +42,6 @@ public class ItemInHandRendererMixin {
 		HumanoidArm arm = mainHand ? player.getMainArm() : player.getMainArm().getOpposite();
 		float side = arm == HumanoidArm.RIGHT ? 1.0F : -1.0F;
 
-		// swing visible pendant le blocage : rotations du transformFirstPersonItem 1.8.9
 		if (swingProgress > 0.0F) {
 			float f = Mth.sin(swingProgress * swingProgress * (float) Math.PI);
 			float f1 = Mth.sin(Mth.sqrt(swingProgress) * (float) Math.PI);

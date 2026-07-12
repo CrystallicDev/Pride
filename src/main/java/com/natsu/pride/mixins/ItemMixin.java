@@ -16,11 +16,7 @@ import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
 
-/**
- * Hit & Block 1.8.9 : clic droit maintenu avec une épée (et l'offhand vide) pour
- * bloquer. La réduction de dégâts est appliquée par PlayerMixin#reduceParryDamage.
- * Ne touche à rien pour les autres items.
- */
+// Hit & block : clic droit maintenu avec une épée (offhand vide) pour bloquer
 @Mixin(Item.class)
 public class ItemMixin {
 
