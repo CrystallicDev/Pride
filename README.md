@@ -6,7 +6,7 @@
 [![Forge](https://img.shields.io/badge/Loader-Forge-darkgreen)](https://minecraftforge.net/)
 [![Neoforge](https://img.shields.io/badge/Loader-Neoforge-purple)](https://neoforged.net/)
 [![Cristallite](https://img.shields.io/badge/Cristallite-Mod_Collection-darkgreen)](https://google.com)
-[![Modrinth](https://img.shields.io/modrinth/dt/cristallite-pride)](https://modrinth.com/mod/cristallite-pride)
+![Modrinth Downloads](https://img.shields.io/modrinth/dt/cristallite-pride?logo=modrinth&label=Downloads&color=00AF5C)
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/nqtsu91)
 
