@@ -42,32 +42,48 @@ import org.spongepowered.asm.mixin.injection.Inject;
 public abstract class PlayerMixin {
 
 	private boolean isReducingParryDamage = false;
-	
+
+	// Drop depuis l'inventaire : Player.drop swing côté client. En jeu (touche Q)
+	// c'est MinecraftMixin qui gère ; ici on couvre le chemin ClickType.THROW.
+	@WrapOperation(method = "drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;",
+			at = @At(value = "INVOKE",
+					target = "Lnet/minecraft/world/entity/player/Player;swing(Lnet/minecraft/world/InteractionHand;)V"))
+	private void removeInventoryDropSwing(Player instance, InteractionHand hand, Operation<Void> original) {
+		if (ServerConfig.loaded() && ServerConfig.REMOVE_DROP_SWING.get()) return;
+		original.call(instance, hand);
+	}
+
+	// La nage (pose horizontale rapide, 1.13+) n'existe pas en 1.8.9 : on force
+	// l'état de nage à false, le joueur reste droit et lent sous l'eau.
+	@Inject(method = "updateSwimming", at = @At("HEAD"), cancellable = true)
+	private void preventSwimming(CallbackInfo ci) {
+		if (!ServerConfig.loaded() || !ServerConfig.DISABLE_SWIMMING.get()) return;
+		((Player) (Object) this).setSwimming(false);
+		ci.cancel();
+	}
+
 	@Inject(method = "getAttackStrengthScale", at = @At("HEAD"), cancellable = true)
 	public void getAttackStrengthScale(float f, CallbackInfoReturnable<Float> cir) {
+	    if (!ServerConfig.loaded()) return;
 	    Player self = (Player) (Object) this;
-	    int attackTicker = ((PlayerAccessor)(Object)this).getAttackStrengthTicker();
 	    ItemStack item = self.getMainHandItem();
-	    if (item == null) {
-	        cir.setReturnValue(0.0F);
-	        return;
-	    }
 	    if ((ServerConfig.DISABLE_AXE_ATTACK_COOLDOWN.get() && item.getItem() instanceof AxeItem) ||
 	        (ServerConfig.DISABLE_SWORD_ATTACK_COOLDOWN.get() && !(item.getItem() instanceof AxeItem))) {
 	        cir.setReturnValue(1.0F);
-	        return;
 	    }
-	    cir.setReturnValue(Mth.clamp(((float)attackTicker + f) / self.getCurrentItemAttackStrengthDelay(), 0.0F, 1.0F));
+	    // sinon : laisser la logique vanilla calculer le cooldown normalement
 	}
 	
 
     @Inject(method = "actuallyHurt", at = @At("HEAD"), cancellable = true)
     private void reduceParryDamage(DamageSource source, float amount, CallbackInfo ci) {
         if (isReducingParryDamage) return;
+        if (!ServerConfig.loaded() || !ServerConfig.ALLOW_SWORD_BLOCKING.get()) return;
 
         Player self = (Player)(Object) this;
 
-        if (!self.isBlocking()) return;
+        // pas de isBlocking() : Forge le réserve aux items avec ToolActions.SHIELD_BLOCK
+        if (!self.isUsingItem()) return;
         if (!(self.getUseItem().getItem() instanceof SwordItem)) return;
         if (source.isBypassArmor()) return;
         if (source.getEntity() == null) return;
@@ -84,12 +100,22 @@ public abstract class PlayerMixin {
 	@Inject(method = "attack", at = @At("HEAD"), cancellable = true)
 	public void attack(Entity targetEntity, CallbackInfo ci) {
 		Player self = (Player) (Object) this;
-		if (!net.minecraftforge.common.ForgeHooks.onPlayerAttackTarget(self, targetEntity)) return;		// Keeping forge events
-		ItemStack item = self.getMainHandItem();
-		boolean isWeaponAxe = (item != null ? (item.getItem() instanceof AxeItem) : false);
-		boolean isWeaponSword = (item != null ? (item.getItem() instanceof SwordItem) : false);
-		
-		
+
+		// pendant un blocage à l'épée, le joueur peut swinguer (animation) mais
+		// ne porte aucun vrai coup
+		if (ServerConfig.loaded() && ServerConfig.ALLOW_SWORD_BLOCKING.get()
+				&& self.isUsingItem() && self.getUseItem().getItem() instanceof SwordItem) {
+			ci.cancel();
+			return;
+		}
+
+		if (!net.minecraftforge.common.ForgeHooks.onPlayerAttackTarget(self, targetEntity)) {
+			// event Forge annulé : on annule aussi la méthode vanilla, sinon l'attaque
+			// originale s'exécuterait quand même derrière nous
+			ci.cancel();
+			return;
+		}
+
 		if (targetEntity.isAttackable()) {
 			if (!targetEntity.skipAttackInteraction(self)) {
 				float baseDamage = CombatHelper.getBaseDamage(self);
@@ -100,6 +126,7 @@ public abstract class PlayerMixin {
 				if (baseDamage > 0 || totalDamage > 0) {
 					float knockBack = CombatHelper.getTotalAttackKnockback(self);
 					float attackStrengthScale = self.getAttackStrengthScale(0.5F);
+					self.resetAttackStrengthTicker();
 					boolean canSweep = CombatHelper.canAttacKSweep(self, targetEntity, attackStrengthScale);
 					float targetHealth = 0.0F;
 					boolean shouldSetOnFire = false;
@@ -198,7 +225,8 @@ public abstract class PlayerMixin {
 								targetEntity.setSecondsOnFire(hasFireAspect * 4);
 							}
 
-							if (self.level instanceof ServerLevel && damageDealt > 2.0F) {
+							// particules de dégâts (coeurs) : elles n'existent pas en 1.8
+							if (!ServerConfig.REVERT_DAMAGE_LOGIC.get() && self.level instanceof ServerLevel && damageDealt > 2.0F) {
 								int hasEnoughDamageForParticles = (int) ((double) damageDealt * 0.5D);
 								((ServerLevel) self.level).sendParticles(ParticleTypes.DAMAGE_INDICATOR, targetEntity.getX(),
 										targetEntity.getY(0.5D), targetEntity.getZ(), hasEnoughDamageForParticles, 0.1D, 0.0D, 0.1D,
@@ -206,8 +234,10 @@ public abstract class PlayerMixin {
 							}
 						}
 					} else {
-						self.level.playSound((Player) null, self.getX(), self.getY(), self.getZ(),
-								SoundEvents.PLAYER_ATTACK_NODAMAGE, self.getSoundSource(), 1.0F, 1.0F);
+						if (ServerConfig.PLAY_WEAK_HIT_SOUNDS.get()) {
+							self.level.playSound((Player) null, self.getX(), self.getY(), self.getZ(),
+									SoundEvents.PLAYER_ATTACK_NODAMAGE, self.getSoundSource(), 1.0F, 1.0F);
+						}
 						if (shouldSetOnFire) {
 							targetEntity.clearFire();
 						}

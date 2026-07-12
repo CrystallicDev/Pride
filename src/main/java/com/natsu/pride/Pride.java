@@ -1,24 +1,19 @@
 package com.natsu.pride;
 
 import com.llamalad7.mixinextras.MixinExtrasBootstrap;
+import com.natsu.pride.config.ServerConfig;
 
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.config.ModConfig.Type;
 
 @Mod(Pride.MODID)
 public class Pride {
 	public static final String MODID = "pride";
+
     public Pride() {
-    	IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+    	ModLoadingContext.get().registerConfig(Type.SERVER, ServerConfig.SPEC);
     	MixinExtrasBootstrap.init();
-    }
-    
-    @SubscribeEvent
-    public static void onCommonSetup(FMLCommonSetupEvent event) {
-    	
     }
 
 }

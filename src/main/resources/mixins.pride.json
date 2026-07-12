@@ -9,10 +9,13 @@
 		"PlayerAccessor",
 		"PlayerMixin",
 		"ItemMixin",
-		"ItemInHandRendererMixin",
-		"MixinHumanoidModel"
+		"BowItemMixin",
+		"LivingEntityMixin"
     ],
-    "client": [],
+    "client": [
+		"ItemInHandRendererMixin",
+		"MinecraftMixin"
+    ],
     "server": [],
     "injectors": {
         "defaultRequire": 1

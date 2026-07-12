@@ -1,59 +1,57 @@
 package com.natsu.pride.mixins;
 
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.At;
+
+import com.natsu.pride.config.ServerConfig;
 
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ShieldItem;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
 
+/**
+ * Hit & Block 1.8.9 : clic droit maintenu avec une épée (et l'offhand vide) pour
+ * bloquer. La réduction de dégâts est appliquée par PlayerMixin#reduceParryDamage.
+ * Ne touche à rien pour les autres items.
+ */
 @Mixin(Item.class)
 public class ItemMixin {
 
-    @Inject(
-        method = "use",
-        at = @At("HEAD"),
-        cancellable = true
-    )
-    private void onUse(Level level, Player player, InteractionHand hand,
-                       CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
-        /*ItemStack stack = player.getItemInHand(hand);
-        if (!(stack.getItem() instanceof SwordItem)) return;
-        ItemStack offhand = player.getItemInHand(InteractionHand.OFF_HAND);
-        if (offhand.getItem() instanceof ShieldItem) return;
+	@Inject(method = "use", at = @At("HEAD"), cancellable = true)
+	private void onUse(Level level, Player player, InteractionHand hand,
+			CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
+		if (!ServerConfig.loaded() || !ServerConfig.ALLOW_SWORD_BLOCKING.get()) return;
 
-        player.startUsingItem(hand);
-        cir.setReturnValue(InteractionResultHolder.consume(stack));*/
-    }
-    
-    @Inject(method = "getUseDuration", at = @At("HEAD"), cancellable = true)
-    private void getUseDuration(ItemStack stack, CallbackInfoReturnable<Integer> cir) {
-        if (stack.getItem() instanceof SwordItem) {
-        	System.out.println("SWORD BLOCK !");
-            cir.setReturnValue(7200);			
-            return;
-        }
-        if (stack.getItem().isEdible()) {
-            cir.setReturnValue(stack.getFoodProperties(null).isFastFood() ? 16 : 32);
-            return;
-        }
-    }
+		ItemStack stack = player.getItemInHand(hand);
+		if (!(stack.getItem() instanceof SwordItem)) return;
+		if (hand != InteractionHand.MAIN_HAND) return;
+		if (!player.getItemInHand(InteractionHand.OFF_HAND).isEmpty()) return;
 
-    @Inject(method = "getUseAnimation", at = @At("HEAD"), cancellable = true)
-    private void getUseAnimation(ItemStack stack, CallbackInfoReturnable<UseAnim> cir) {
-        if (stack.getItem() instanceof SwordItem) {
-            cir.setReturnValue(UseAnim.BLOCK);
-            return;
-        }
-        cir.setReturnValue(stack.getItem().isEdible() ? UseAnim.EAT : UseAnim.NONE);
-    }
+		player.startUsingItem(hand);
+		cir.setReturnValue(InteractionResultHolder.consume(stack));
+	}
+
+	@Inject(method = "getUseDuration", at = @At("HEAD"), cancellable = true)
+	private void getUseDuration(ItemStack stack, CallbackInfoReturnable<Integer> cir) {
+		if (!ServerConfig.loaded() || !ServerConfig.ALLOW_SWORD_BLOCKING.get()) return;
+		if (stack.getItem() instanceof SwordItem) {
+			cir.setReturnValue(7200);
+		}
+	}
+
+	@Inject(method = "getUseAnimation", at = @At("HEAD"), cancellable = true)
+	private void getUseAnimation(ItemStack stack, CallbackInfoReturnable<UseAnim> cir) {
+		if (!ServerConfig.loaded() || !ServerConfig.ALLOW_SWORD_BLOCKING.get()) return;
+		if (stack.getItem() instanceof SwordItem) {
+			cir.setReturnValue(UseAnim.BLOCK);
+		}
+	}
+
 }

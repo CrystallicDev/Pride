@@ -5,7 +5,7 @@ import net.minecraftforge.common.ForgeConfigSpec;
 public class ServerConfig {
 
 	public static final ForgeConfigSpec SPEC;
-	
+
 	public static final ForgeConfigSpec.BooleanValue REVERT_DAMAGE_LOGIC;
 	public static final ForgeConfigSpec.BooleanValue REVERT_KNOCKBACK;
 	public static final ForgeConfigSpec.BooleanValue ALLOW_SWORD_BLOCKING;
@@ -13,17 +13,21 @@ public class ServerConfig {
 	public static final ForgeConfigSpec.BooleanValue DISABLE_SWORD_ATTACK_COOLDOWN;
 	public static final ForgeConfigSpec.BooleanValue DISABLE_SWEEPING_ATTACKS;
 	public static final ForgeConfigSpec.BooleanValue DISABLE_AXE_ATTACK_COOLDOWN;
+	public static final ForgeConfigSpec.BooleanValue REMOVE_ARROW_DISPERSION;
 	public static final ForgeConfigSpec.BooleanValue REVERT_FISHING_ROD;
 	public static final ForgeConfigSpec.BooleanValue SHIELDS_ONLY_BLOCK_PROJECTILES;
+	public static final ForgeConfigSpec.BooleanValue DISABLE_SWIMMING;
 	public static final ForgeConfigSpec.BooleanValue PLAY_CRIT_SOUNDS;
 	public static final ForgeConfigSpec.BooleanValue PLAY_STRONG_HIT_SOUNDS;
 	public static final ForgeConfigSpec.BooleanValue PLAY_WEAK_HIT_SOUNDS;
 
 	public static final ForgeConfigSpec.BooleanValue CHANGE_BODY_RENDER;
-	
+	public static final ForgeConfigSpec.BooleanValue REMOVE_BUCKET_ANIMATION;
+	public static final ForgeConfigSpec.BooleanValue REMOVE_DROP_SWING;
+
 	static {
 		ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
-		builder.push("# Enchanting Table Stages");
+		builder.push("combat");
 		REVERT_DAMAGE_LOGIC = builder
 				.comment("Revert the damage calculation logic to 1.8.9")
 				.define("revertDamageLogic", true);
@@ -31,44 +35,69 @@ public class ServerConfig {
 				.comment("Revert the knockback logic to 1.8.9")
 				.define("revertKnockback", true);
 		ALLOW_SWORD_BLOCKING = builder
-				.comment("Allow the players to block damage by right clicking with a sword")
+				.comment("Allow the players to block damage by holding right click with a sword\n"
+						+ "when their offhand is empty.")
 				.define("allowSwordBlocking", true);
 		BLOCKING_DAMAGE_REDUCTION = builder
-				.comment("The damage reduction (in percentage) of the damage reduction when blocking damage with a sword.")
-				.defineInRange("blockingDamageReduction", 0.5f, 0.0f, 1.0f);
+				.comment("The damage reduction (in percentage) applied when blocking damage with a sword.")
+				.defineInRange("blockingDamageReduction", 0.5d, 0.0d, 1.0d);
 		DISABLE_SWORD_ATTACK_COOLDOWN = builder
-				.comment("Disable the attack cooldown for swords.")
+				.comment("Disable the attack cooldown for every item except axes.")
 				.define("disableSwordCooldown", true);
 		DISABLE_SWEEPING_ATTACKS = builder
-				.comment("Disable the sweeping attacks")
+				.comment("Disable the sweeping attacks, their particles and sounds. This also\n"
+						+ "disables the Sweeping Edge enchantment.")
 				.define("disableSweepingAttacks", true);
 		DISABLE_AXE_ATTACK_COOLDOWN = builder
-				.comment("Disable the attack cooldown for axes.")
+				.comment("Disable the attack cooldown for axes. To keep them balanced, any axe's\n"
+						+ "base damage is reduced by 2 when this is enabled.")
 				.define("disableAxesCooldown", true);
+		REMOVE_ARROW_DISPERSION = builder
+				.comment("Remove the arrow dispersion (inaccuracy) of bows, like in 1.8.9.")
+				.define("removeArrowDispersion", true);
 		REVERT_FISHING_ROD = builder
 				.comment("Revert the fishing rod to the 1.8.9 physics and logic.")
-				.define("disableSwordCooldown", true);
+				.define("revertFishingRod", true);
 		SHIELDS_ONLY_BLOCK_PROJECTILES = builder
-				.comment("Disable the attack cooldown for swords.")
-				.define("disableSwordCooldown", false);
+				.comment("Make shields only block projectiles : melee hits go through.")
+				.define("shieldsOnlyBlockProjectiles", false);
+		DISABLE_SWIMMING = builder
+				.comment("Disable swimming (the 1.13+ horizontal fast-swim). Players move underwater\n"
+						+ "in the old upright pose, like in 1.8.9.")
+				.define("disableSwimming", true);
+		builder.pop();
+
+		builder.push("sounds");
 		PLAY_CRIT_SOUNDS = builder
-				.comment("Disable the sound for critical hits.")
-				.define("disableCriticalHitSounds", true);
+				.comment("Play the vanilla 1.9+ critical hit sound.")
+				.define("playCriticalHitSounds", false);
 		PLAY_STRONG_HIT_SOUNDS = builder
-				.comment("Disable the sound for strong hits.")
-				.define("disableStrongHitSounds", true);
+				.comment("Play the vanilla 1.9+ strong hit sound.")
+				.define("playStrongHitSounds", false);
 		PLAY_WEAK_HIT_SOUNDS = builder
-				.comment("Disable the sound for weak hits.")
-				.define("disableWeakHitSounds", true);
-		
+				.comment("Play the vanilla 1.9+ weak / no-damage hit sounds.")
+				.define("playWeakHitSounds", false);
+		builder.pop();
+
+		builder.push("render");
 		CHANGE_BODY_RENDER = builder
 				.comment("Change the player body rotation to match that of 1.8.9")
 				.define("changeBodyRender", true);
-
+		REMOVE_BUCKET_ANIMATION = builder
+				.comment("Remove the re-equip animation (item going down) when a bucket is filled\n"
+						+ "or emptied, like in 1.8.9.")
+				.define("removeBucketAnimation", true);
+		REMOVE_DROP_SWING = builder
+				.comment("Remove the arm swing animation when dropping an item, like in 1.8.9.")
+				.define("removeDropSwingAnimation", true);
 		builder.pop();
+
 		SPEC = builder.build();
 	}
 
-	
-	
+	/** La config SERVER n'est pas chargée dans les menus : à vérifier avant tout .get() dans un mixin. */
+	public static boolean loaded() {
+		return SPEC.isLoaded();
+	}
+
 }

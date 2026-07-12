@@ -141,6 +141,13 @@ tasks.named('jar', Jar).configure {
     finalizedBy 'reobfJar'
 }
 
+// Le refmap doit aussi être présent dans le jar jarJar (-all), c'est lui qui est distribué
+tasks.named('jarJar').configure {
+    from(refmapFile) {
+        rename { refmapName }
+    }
+}
+
 publishing {
     publications {
         register('mavenJava', MavenPublication) {

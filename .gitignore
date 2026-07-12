@@ -30,3 +30,7 @@ changelog.txt
 gradlew
 gradlew.bat
 gradle.properties
+
+# run/datagen artifacts
+run-data
+src/generated/resources/.cache

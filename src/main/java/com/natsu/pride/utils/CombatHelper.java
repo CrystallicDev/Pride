@@ -24,9 +24,8 @@ public class CombatHelper {
 	 * Returns the base damage of an {@link Player} depending on {@link Pride}'s config
 	 * */
 	public static float getBaseDamage(Player player) {
-		ItemStack item = player.getMainHandItem();
-		boolean isWeaponAxe = (item != null ? (item.getItem() instanceof AxeItem) : false);
-		if (ServerConfig.REVERT_DAMAGE_LOGIC.get() && isWeaponAxe) {
+		boolean isWeaponAxe = player.getMainHandItem().getItem() instanceof AxeItem;
+		if (ServerConfig.DISABLE_AXE_ATTACK_COOLDOWN.get() && isWeaponAxe) {
 			//Nerfing axe damage by 2, should be enough to rebalance damage overall
 			return (float) player.getAttributeValue(Attributes.ATTACK_DAMAGE) - 2;
 		}
@@ -37,32 +36,29 @@ public class CombatHelper {
 	 * Returns the attack knockback of an {@link Player} depending on {@link Pride}'s config
 	 * */
 	public static float getTotalAttackKnockback(Player player) {
-		ItemStack item = player.getMainHandItem();
-		boolean isWeaponAxe = (item != null ? (item.getItem() instanceof AxeItem) : false);
-		float base = (float) player.getAttributeValue(Attributes.ATTACK_KNOCKBACK);
-		boolean isAttackTimerOk = player.getAttackStrengthScale(0.5F) > 0.9F;			// getAttackStrengthScale sShould be bypassed by a Mixin in PlayerMixin using Pride's authority
-		
+		float attackKnockback = (float) player.getAttributeValue(Attributes.ATTACK_KNOCKBACK);
+		attackKnockback += EnchantmentHelper.getKnockbackBonus(player);
+
 		if (ServerConfig.REVERT_KNOCKBACK.get()) {
 			//1.8.9 knockback method. By default, it only counts the weapon's knockback, the
 			// knockback enchants, and whether or not the attacker is sprinting.
-			float attackKnockback = (float) player.getAttributeValue(Attributes.ATTACK_KNOCKBACK);
-			attackKnockback += EnchantmentHelper.getKnockbackBonus(player);
-			if (player.isSprinting()) { attackKnockback++; }
+			if (player.isSprinting()) {
+				attackKnockback++;
+			}
 		} else {
 			//Default knockback, here it is slightly different, because it plays a sound, and
 			//only adds knockback if the player is sprinting and if his attack cooldown is high
-			//enough. This will get bypassed is disableAttackCooldown is enabled, because getAttackStrengthValue will
-			//be overriden when necessary.
-			float attackKnockback = (float) player.getAttributeValue(Attributes.ATTACK_KNOCKBACK); 
-			attackKnockback += EnchantmentHelper.getKnockbackBonus(player);
+			//enough. This will get bypassed if disableAttackCooldown is enabled, because
+			//getAttackStrengthScale is overriden by PlayerMixin.
+			boolean isAttackTimerOk = player.getAttackStrengthScale(0.5F) > 0.9F;
 			if (player.isSprinting() && isAttackTimerOk) {
 				player.level.playSound((Player) null, player.getX(), player.getY(), player.getZ(),
 						SoundEvents.PLAYER_ATTACK_KNOCKBACK, player.getSoundSource(), 1.0F, 1.0F);
 				++attackKnockback;
 			}
 		}
-		
-		return base;
+
+		return attackKnockback;
 	}
 
 	/**
@@ -147,18 +143,17 @@ public class CombatHelper {
 	
 	public static void playSounds(Player self, Entity targetEntity, boolean canSweep, boolean isCriticalHit) {
 		boolean isAttackTimerOk = self.getAttackStrengthScale(0.5F) > 0.9F;
-		
+
 		if (isCriticalHit && ServerConfig.PLAY_CRIT_SOUNDS.get()) {
 			self.level.playSound((Player) null, self.getX(), self.getY(), self.getZ(),
 					SoundEvents.PLAYER_ATTACK_CRIT, self.getSoundSource(), 1.0F, 1.0F);
-			self.crit(targetEntity);
 		}
 
 		if (!isCriticalHit && !canSweep) {
 			if (isAttackTimerOk && ServerConfig.PLAY_STRONG_HIT_SOUNDS.get()) {
 				self.level.playSound((Player) null, self.getX(), self.getY(), self.getZ(),
 						SoundEvents.PLAYER_ATTACK_STRONG, self.getSoundSource(), 1.0F, 1.0F);
-			} else if (ServerConfig.PLAY_WEAK_HIT_SOUNDS.get()){
+			} else if (!isAttackTimerOk && ServerConfig.PLAY_WEAK_HIT_SOUNDS.get()) {
 				self.level.playSound((Player) null, self.getX(), self.getY(), self.getZ(),
 						SoundEvents.PLAYER_ATTACK_WEAK, self.getSoundSource(), 1.0F, 1.0F);
 			}
