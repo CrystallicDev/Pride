@@ -1,7 +1,5 @@
 package com.natsu.pride.mixins;
 
-import java.util.Random;
-
 import org.spongepowered.asm.mixin.Mixin;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
@@ -14,8 +12,8 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FishingHook;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.levelgen.RandomSource;
 import net.minecraft.world.phys.EntityHitResult;
 
 import org.spongepowered.asm.mixin.injection.At;
@@ -52,7 +50,7 @@ public class FishHookMixin {
 		motionY = (motionY / len) * speed;
 		motionZ = (motionZ / len) * speed;
 
-		Random rand = hook.getLevel().getRandom();
+		RandomSource rand = hook.getLevel().getRandom();
 		motionX += rand.nextGaussian() * 0.0075D * inaccuracy;
 		motionY += rand.nextGaussian() * 0.0075D * inaccuracy;
 		motionZ += rand.nextGaussian() * 0.0075D * inaccuracy;
