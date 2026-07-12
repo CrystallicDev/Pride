@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.natsu.pride.config.ServerConfig;
 
 import net.minecraft.util.Mth;
@@ -14,15 +15,6 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
-/**
- * - shieldsOnlyBlockProjectiles : les boucliers ne bloquent que les projectiles.
- * - changeBodyRender : rotation du corps façon 1.8.9. L'algorithme vanilla
- *   (tickHeadTurn) est identique entre 1.8.9 et 1.18.2 (vérifié contre MCP-919) :
- *   ce qui change ici, ce sont les seuils — le corps suit la tête dès 20° d'écart
- *   (au lieu de 50°) et l'écart max tête-corps passe de 75° à 45°, ce qui donne le
- *   ressenti "le corps tourne avec la tête" des anciennes versions. On retire aussi
- *   le flip du corps en marche arrière ajouté en 1.9+.
- */
 @Mixin(LivingEntity.class)
 public class LivingEntityMixin {
 
@@ -32,6 +24,14 @@ public class LivingEntityMixin {
 				&& !source.isProjectile()) {
 			cir.setReturnValue(false);
 		}
+	}
+
+	// 1.8.9 : vitesse de nage constante, pas de boost de sprint quand submergé
+	@ModifyExpressionValue(method = "travel",
+			at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;isSprinting()Z", ordinal = 0))
+	private boolean flatWaterSpeed(boolean original) {
+		if (ServerConfig.loaded() && ServerConfig.DISABLE_SWIMMING.get()) return false;
+		return original;
 	}
 
 	@Inject(method = "tickHeadTurn", at = @At("HEAD"), cancellable = true)
@@ -52,8 +52,7 @@ public class LivingEntityMixin {
 		cir.setReturnValue(backwards ? -dist : dist);
 	}
 
-	// en 1.8.9 le corps s'oriente vers la direction du déplacement même en marche
-	// arrière ; la 1.9+ le retourne (check 95°-265°). On neutralise ce check.
+	// retire le retournement du corps en marche arrière (ajouté en 1.9)
 	@ModifyConstant(method = "tick", constant = @Constant(floatValue = 95.0F), require = 0)
 	private float removeBackwardsBodyFlip(float value) {
 		if (ServerConfig.loaded() && ServerConfig.CHANGE_BODY_RENDER.get()

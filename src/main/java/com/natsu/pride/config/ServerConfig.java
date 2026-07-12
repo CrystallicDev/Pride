@@ -62,8 +62,8 @@ public class ServerConfig {
 				.comment("Make shields only block projectiles : melee hits go through.")
 				.define("shieldsOnlyBlockProjectiles", false);
 		DISABLE_SWIMMING = builder
-				.comment("Disable swimming (the 1.13+ horizontal fast-swim). Players move underwater\n"
-						+ "in the old upright pose, like in 1.8.9.")
+				.comment("Revert swimming to 1.8.9: no horizontal fast-swim pose, and a constant\n"
+						+ "water speed (no sprint boost when submerged).")
 				.define("disableSwimming", true);
 		builder.pop();
 
