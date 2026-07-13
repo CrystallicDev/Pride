@@ -148,6 +148,15 @@ tasks.named('jarJar').configure {
     }
 }
 
+// Archive chaque build (le jar distribuable -all) dans CustomMods/builds avec un nom
+// versionné (mc + mod version) pour ne pas écraser les builds des autres versions.
+tasks.register('archiveBuild', Copy) {
+    from "${buildDir}/libs/${mod_id}-${mod_version}-all.jar"
+    into "${projectDir}/../builds"
+    rename { "${mod_id}-${minecraft_version}-${mod_version}.jar" }
+}
+tasks.named('build').configure { finalizedBy 'archiveBuild' }
+
 publishing {
     publications {
         register('mavenJava', MavenPublication) {
