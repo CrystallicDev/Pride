@@ -18,6 +18,7 @@ public class ServerConfig {
 	public static final ForgeConfigSpec.BooleanValue REVERT_FISHING_ROD;
 	public static final ForgeConfigSpec.BooleanValue SHIELDS_ONLY_BLOCK_PROJECTILES;
 	public static final ForgeConfigSpec.BooleanValue DISABLE_SWIMMING;
+	public static final ForgeConfigSpec.BooleanValue SLOW_WHILE_USING_ITEM;
 	public static final ForgeConfigSpec.BooleanValue PLAY_CRIT_SOUNDS;
 	public static final ForgeConfigSpec.BooleanValue PLAY_STRONG_HIT_SOUNDS;
 	public static final ForgeConfigSpec.BooleanValue PLAY_WEAK_HIT_SOUNDS;
@@ -70,6 +71,10 @@ public class ServerConfig {
 				.comment("Revert swimming to 1.8.9: no horizontal fast-swim pose, and a constant\n"
 						+ "water speed (no sprint boost when submerged).")
 				.define("disableSwimming", true);
+		SLOW_WHILE_USING_ITEM = builder
+				.comment("Cancel sprint while using an item (eating, drinking), like in 1.8.9, so the\n"
+						+ "player can't keep moving at sprint speed while eating.")
+				.define("slowWhileUsingItem", true);
 		builder.pop();
 
 		builder.push("sounds");
