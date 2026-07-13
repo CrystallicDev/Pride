@@ -30,7 +30,7 @@ public class LivingEntityMixin {
 	@Inject(method = "isDamageSourceBlocked", at = @At("HEAD"), cancellable = true)
 	private void onlyBlockProjectiles(DamageSource source, CallbackInfoReturnable<Boolean> cir) {
 		if (ServerConfig.loaded() && ServerConfig.SHIELDS_ONLY_BLOCK_PROJECTILES.get()
-				&& !source.isProjectile()) {
+				&& !source.is(net.minecraft.tags.DamageTypeTags.IS_PROJECTILE)) {
 			cir.setReturnValue(false);
 		}
 	}
@@ -99,7 +99,7 @@ public class LivingEntityMixin {
 		}
 		self.setDeltaMovement(motion);
 
-		self.calculateEntityAnimation(self, self instanceof FlyingAnimal);
+		self.calculateEntityAnimation(self instanceof FlyingAnimal);
 		ci.cancel();
 	}
 

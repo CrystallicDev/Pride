@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import com.natsu.pride.config.ServerConfig;
 
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -29,7 +29,7 @@ public class ItemInHandRendererMixin {
 
 	@Inject(method = "renderArmWithItem",
 			at = @At(value = "INVOKE",
-					target = "Lnet/minecraft/client/renderer/ItemInHandRenderer;renderItem(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/client/renderer/block/model/ItemTransforms$TransformType;ZLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V"))
+					target = "Lnet/minecraft/client/renderer/ItemInHandRenderer;renderItem(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemDisplayContext;ZLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V"))
 	private void applyBlockingPose(AbstractClientPlayer player, float partialTicks, float pitch,
 			InteractionHand hand, float swingProgress, ItemStack stack, float equippedProgress,
 			PoseStack poseStack, MultiBufferSource buffer, int combinedLight, CallbackInfo ci) {
@@ -45,15 +45,15 @@ public class ItemInHandRendererMixin {
 		if (swingProgress > 0.0F) {
 			float f = Mth.sin(swingProgress * swingProgress * (float) Math.PI);
 			float f1 = Mth.sin(Mth.sqrt(swingProgress) * (float) Math.PI);
-			poseStack.mulPose(Vector3f.YP.rotationDegrees(side * f * -20.0F));
-			poseStack.mulPose(Vector3f.ZP.rotationDegrees(side * f1 * -20.0F));
-			poseStack.mulPose(Vector3f.XP.rotationDegrees(f1 * -80.0F));
+			poseStack.mulPose(Axis.YP.rotationDegrees(side * f * -20.0F));
+			poseStack.mulPose(Axis.ZP.rotationDegrees(side * f1 * -20.0F));
+			poseStack.mulPose(Axis.XP.rotationDegrees(f1 * -80.0F));
 		}
 
 		poseStack.translate(side * -0.14142136F, 0.08F, 0.14142136F);
-		poseStack.mulPose(Vector3f.XP.rotationDegrees(-102.25F));
-		poseStack.mulPose(Vector3f.YP.rotationDegrees(side * 13.365F));
-		poseStack.mulPose(Vector3f.ZP.rotationDegrees(side * 78.05F));
+		poseStack.mulPose(Axis.XP.rotationDegrees(-102.25F));
+		poseStack.mulPose(Axis.YP.rotationDegrees(side * 13.365F));
+		poseStack.mulPose(Axis.ZP.rotationDegrees(side * 78.05F));
 	}
 
 	@WrapOperation(method = "tick",

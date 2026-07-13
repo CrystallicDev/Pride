@@ -82,7 +82,7 @@ public abstract class PlayerMixin {
         // pas de isBlocking() : Forge le réserve aux items avec ToolActions.SHIELD_BLOCK
         if (!self.isUsingItem()) return;
         if (!(self.getUseItem().getItem() instanceof SwordItem)) return;
-        if (source.isBypassArmor()) return;
+        if (source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_ARMOR)) return;
         if (source.getEntity() == null) return;
 
         amount = (1.0F + amount) * (1 - ServerConfig.BLOCKING_DAMAGE_REDUCTION.get().floatValue());
@@ -138,7 +138,7 @@ public abstract class PlayerMixin {
 					}
 					
 					Vec3 targetMovement = targetEntity.getDeltaMovement();
-					boolean targetCanBeHurt = targetEntity.hurt(DamageSource.playerAttack(self), totalDamage);
+					boolean targetCanBeHurt = targetEntity.hurt(self.damageSources().playerAttack(self), totalDamage);
 					if (targetCanBeHurt) {
 						if (knockBack > 0) {
 							// This handles 1.8 / 1.9+ knockbacks
@@ -161,7 +161,7 @@ public abstract class PlayerMixin {
 									livingentity.knockback((double) 0.4F,
 											(double) Mth.sin(self.getYRot() * ((float) Math.PI / 180F)),
 											(double) (-Mth.cos(self.getYRot() * ((float) Math.PI / 180F))));
-									livingentity.hurt(DamageSource.playerAttack(self), sweepingDamage);
+									livingentity.hurt(self.damageSources().playerAttack(self), sweepingDamage);
 								}
 							}
 
@@ -308,7 +308,7 @@ public abstract class PlayerMixin {
 					}
 
 					Vec3 targetMovement = target.getDeltaMovement();
-					boolean targetCanBeHurt = target.hurt(DamageSource.playerAttack(self), baseAttackDamage);
+					boolean targetCanBeHurt = target.hurt(self.damageSources().playerAttack(self), baseAttackDamage);
 					if (targetCanBeHurt) {
 						if (attackKnockback > 0) {
 							if (target instanceof LivingEntity) {
@@ -341,7 +341,7 @@ public abstract class PlayerMixin {
 									livingentity.knockback((double) 0.4F,
 											(double) Mth.sin(self.getYRot() * ((float) Math.PI / 180F)),
 											(double) (-Mth.cos(self.getYRot() * ((float) Math.PI / 180F))));
-									livingentity.hurt(DamageSource.playerAttack(self), sweepingDamage);
+									livingentity.hurt(self.damageSources().playerAttack(self), sweepingDamage);
 								}
 							}
 

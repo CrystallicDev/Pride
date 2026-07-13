@@ -65,7 +65,7 @@ public class FishHookMixin {
         Entity target = result.getEntity();
         Entity owner = hook.getOwner();
         if (!(owner instanceof Player player)) return;
-		target.hurt(DamageSource.thrown(hook, player), 0.0F);
+		target.hurt(hook.damageSources().thrown(hook, player), 0.0F);
         if (target instanceof Player) {
         	ci.cancel();
         }
