@@ -2,6 +2,8 @@ package com.natsu.pride.mixins;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -12,6 +14,17 @@ import net.minecraft.client.player.LocalPlayer;
 
 @Mixin(LocalPlayer.class)
 public class LocalPlayerMixin {
+
+	// 1.8.9 : utiliser un item (manger, boire) coupe le sprint. La 1.9+ le laisse actif,
+	// d'où un déplacement plus rapide en mangeant. On rétablit la coupure.
+	@Inject(method = "aiStep", at = @At("HEAD"))
+	private void cancelSprintWhileUsingItem(CallbackInfo ci) {
+		if (!ServerConfig.loaded() || !ServerConfig.SLOW_WHILE_USING_ITEM.get()) return;
+		LocalPlayer self = (LocalPlayer) (Object) this;
+		if (self.isUsingItem() && self.isSprinting()) {
+			self.setSprinting(false);
+		}
+	}
 
 	// 1.8.9 : le sprint reste actif dans l'eau. La 1.18 le coupe dès que la tête sort
 	// (aiStep n'autorise le sprint que onGround/immergé). On empêche uniquement cette
