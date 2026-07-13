@@ -5,7 +5,8 @@
 
 [![Forge](https://img.shields.io/badge/Loader-Forge-darkgreen)](https://minecraftforge.net/)
 [![Neoforge](https://img.shields.io/badge/Loader-Neoforge-purple)](https://neoforged.net/)
-[![Cristallite](https://img.shields.io/badge/Cristallite-Mod_Collection-darkgreen)](https://google.com)
+[![Neoforge](https://img.shields.io/badge/Loader-Fabric-cyan)](https://fabricmc.net)
+[![Cristallite](https://img.shields.io/badge/Cristallite-Mod_Collection-darkgreen)](https://modrinth.com/collection/4wMgAhzS)
 ![Modrinth Downloads](https://img.shields.io/modrinth/dt/cristallite-pride?logo=modrinth&label=Downloads&color=00AF5C)
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/nqtsu91)
@@ -23,8 +24,9 @@ Pride reworks the knockback functions, and attack cooldowns to make swords and f
 ## Availability 
 |Loader|Version|
 |--------|--------|
-| Forge | 1.18.2, 1.19.2, 1.20.1 |
+| Forge | 1.18.2, 1.19.2, 1.19.4, 1.20.1 |
 | Neoforge | 1.21.11, 26.1.2, 26.2 |
+| Fabric | 1.18.2, 1.19.2, 1.19.4, 1.20.1, 1.21.11, 26.1.2, 26.2 |
 
 ## Usage 
 Feel free to integrate Pride in any of your modpacks, or create new versions of this mod. However, any redistributed version, modified or not, must stay fully free, and keep a link to the original.
