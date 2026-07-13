@@ -14,6 +14,7 @@ public class ServerConfig {
 	public static final ForgeConfigSpec.BooleanValue DISABLE_SWEEPING_ATTACKS;
 	public static final ForgeConfigSpec.BooleanValue DISABLE_AXE_ATTACK_COOLDOWN;
 	public static final ForgeConfigSpec.BooleanValue REMOVE_ARROW_DISPERSION;
+	public static final ForgeConfigSpec.BooleanValue REVERT_BOW;
 	public static final ForgeConfigSpec.BooleanValue REVERT_FISHING_ROD;
 	public static final ForgeConfigSpec.BooleanValue SHIELDS_ONLY_BLOCK_PROJECTILES;
 	public static final ForgeConfigSpec.BooleanValue DISABLE_SWIMMING;
@@ -55,6 +56,10 @@ public class ServerConfig {
 		REMOVE_ARROW_DISPERSION = builder
 				.comment("Remove the arrow dispersion (inaccuracy) of bows, like in 1.8.9.")
 				.define("removeArrowDispersion", true);
+		REVERT_BOW = builder
+				.comment("Revert arrows to 1.8.9: they no longer inherit the shooter's velocity,\n"
+						+ "and can hit their own shooter after a short delay (enables bow boosting).")
+				.define("revertBow", true);
 		REVERT_FISHING_ROD = builder
 				.comment("Revert the fishing rod to the 1.8.9 physics and logic.")
 				.define("revertFishingRod", true);

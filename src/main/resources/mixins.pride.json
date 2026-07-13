@@ -10,7 +10,8 @@
 		"PlayerMixin",
 		"ItemMixin",
 		"BowItemMixin",
-		"LivingEntityMixin"
+		"LivingEntityMixin",
+		"ProjectileMixin"
     ],
     "client": [
 		"ItemInHandRendererMixin",
