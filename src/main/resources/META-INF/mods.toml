@@ -1,5 +1,5 @@
 modLoader="javafml" # mandatory
-loaderVersion="[45,)" # Forge for 1.19.4 starts at 45.x
+loaderVersion="[47,)" # Forge for 1.20.1 starts at 47.x
 license="MIT"
 # Optional: replace with a real link later
 # issueTrackerURL="https://github.com/yourname/yourmod/issues"
@@ -18,14 +18,14 @@ Pride is the only reason you stand
 [[dependencies.pride]]
 modId="forge"
 mandatory=true
-versionRange="[45,)" # Forge 45.x = 1.19.4
+versionRange="[47,)" # Forge 47.x = 1.20.1
 ordering="NONE"
 side="BOTH"
 
 [[dependencies.pride]]
 modId="minecraft"
 mandatory=true
-versionRange="[1.19.4,1.20)"
+versionRange="[1.20.1,1.21)"
 ordering="NONE"
 side="BOTH"
 

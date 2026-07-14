@@ -151,12 +151,12 @@ public abstract class PlayerMixin {
 						if (canSweep) {
 							//This is the same sweep method than vanilla
 							float sweepingDamage = 1.0F + EnchantmentHelper.getSweepingDamageRatio(self) * totalDamage;
-							for (LivingEntity livingentity : self.level.getEntitiesOfClass(LivingEntity.class,
+							for (LivingEntity livingentity : self.level().getEntitiesOfClass(LivingEntity.class,
 									self.getItemInHand(InteractionHand.MAIN_HAND).getSweepHitBox(self, targetEntity))) {
 								if (livingentity != self && livingentity != targetEntity && !self.isAlliedTo(livingentity)
 										&& (!(livingentity instanceof ArmorStand)
 												|| !((ArmorStand) livingentity).isMarker())
-										&& self.canHit(livingentity, 0)) { // Original check was dist < 3, range is 3,
+										&& self.canReach(livingentity, 0)) { // Original check was dist < 3, range is 3,
 																			// so vanilla used padding=0
 									livingentity.knockback((double) 0.4F,
 											(double) Mth.sin(self.getYRot() * ((float) Math.PI / 180F)),
@@ -165,7 +165,7 @@ public abstract class PlayerMixin {
 								}
 							}
 
-							self.level.playSound((Player) null, self.getX(), self.getY(), self.getZ(),
+							self.level().playSound((Player) null, self.getX(), self.getY(), self.getZ(),
 									SoundEvents.PLAYER_ATTACK_SWEEP, self.getSoundSource(), 1.0F, 1.0F);
 							self.sweepAttack();
 						}
@@ -202,7 +202,7 @@ public abstract class PlayerMixin {
 							entity = ((net.minecraftforge.entity.PartEntity<?>) targetEntity).getParent();
 						}
 
-						if (!self.level.isClientSide && !itemstack1.isEmpty() && entity instanceof LivingEntity) {
+						if (!self.level().isClientSide && !itemstack1.isEmpty() && entity instanceof LivingEntity) {
 							ItemStack copy = itemstack1.copy();
 							itemstack1.hurtEnemy((LivingEntity) entity, self);
 							if (itemstack1.isEmpty()) {
@@ -220,16 +220,16 @@ public abstract class PlayerMixin {
 							}
 
 							// particules de dégâts (coeurs) : elles n'existent pas en 1.8
-							if (!ServerConfig.REVERT_DAMAGE_LOGIC.get() && self.level instanceof ServerLevel && damageDealt > 2.0F) {
+							if (!ServerConfig.REVERT_DAMAGE_LOGIC.get() && self.level() instanceof ServerLevel && damageDealt > 2.0F) {
 								int hasEnoughDamageForParticles = (int) ((double) damageDealt * 0.5D);
-								((ServerLevel) self.level).sendParticles(ParticleTypes.DAMAGE_INDICATOR, targetEntity.getX(),
+								((ServerLevel) self.level()).sendParticles(ParticleTypes.DAMAGE_INDICATOR, targetEntity.getX(),
 										targetEntity.getY(0.5D), targetEntity.getZ(), hasEnoughDamageForParticles, 0.1D, 0.0D, 0.1D,
 										0.2D);
 							}
 						}
 					} else {
 						if (ServerConfig.PLAY_WEAK_HIT_SOUNDS.get()) {
-							self.level.playSound((Player) null, self.getX(), self.getY(), self.getZ(),
+							self.level().playSound((Player) null, self.getX(), self.getY(), self.getZ(),
 									SoundEvents.PLAYER_ATTACK_NODAMAGE, self.getSoundSource(), 1.0F, 1.0F);
 						}
 						if (shouldSetOnFire) {
@@ -270,13 +270,13 @@ public abstract class PlayerMixin {
 					// Forge: Initialize self value to the attack knockback attribute of the player, which is by default 0
 					attackKnockback += EnchantmentHelper.getKnockbackBonus(self);
 					if (self.isSprinting() && isAttackTimerOk) {
-						self.level.playSound((Player) null, self.getX(), self.getY(), self.getZ(),
+						self.level().playSound((Player) null, self.getX(), self.getY(), self.getZ(),
 								SoundEvents.PLAYER_ATTACK_KNOCKBACK, self.getSoundSource(), 1.0F, 1.0F);
 						++attackKnockback;
 						sprintAndAttackTimerOk = true;
 					}
 
-					boolean isCriticalHit = isAttackTimerOk && self.fallDistance > 0.0F && !self.isOnGround()
+					boolean isCriticalHit = isAttackTimerOk && self.fallDistance > 0.0F && !self.onGround()
 							&& !self.onClimbable() && !self.isInWater() && !self.hasEffect(MobEffects.BLINDNESS)
 							&& !self.isPassenger() && target instanceof LivingEntity;
 					isCriticalHit = isCriticalHit && !self.isSprinting();
@@ -290,7 +290,7 @@ public abstract class PlayerMixin {
 					baseAttackDamage += additionalDamage;
 					boolean canAttackSweep = false;
 					double walkDistanceDelta = (double) (self.walkDist - self.walkDistO);
-					if (isAttackTimerOk && !isCriticalHit && !sprintAndAttackTimerOk && self.isOnGround()
+					if (isAttackTimerOk && !isCriticalHit && !sprintAndAttackTimerOk && self.onGround()
 							&& walkDistanceDelta < (double) self.getSpeed()) {
 						ItemStack itemstack = self.getItemInHand(InteractionHand.MAIN_HAND);
 						canAttackSweep = itemstack.canPerformAction(net.minecraftforge.common.ToolActions.SWORD_SWEEP);
@@ -331,12 +331,12 @@ public abstract class PlayerMixin {
 							float sweepingDamage = 1.0F
 									+ EnchantmentHelper.getSweepingDamageRatio(self) * baseAttackDamage;
 
-							for (LivingEntity livingentity : self.level.getEntitiesOfClass(LivingEntity.class,
+							for (LivingEntity livingentity : self.level().getEntitiesOfClass(LivingEntity.class,
 									self.getItemInHand(InteractionHand.MAIN_HAND).getSweepHitBox(self, target))) {
 								if (livingentity != self && livingentity != target && !self.isAlliedTo(livingentity)
 										&& (!(livingentity instanceof ArmorStand)
 												|| !((ArmorStand) livingentity).isMarker())
-										&& self.canHit(livingentity, 0)) { // Original check was dist < 3, range is 3,
+										&& self.canReach(livingentity, 0)) { // Original check was dist < 3, range is 3,
 																			// so vanilla used padding=0
 									livingentity.knockback((double) 0.4F,
 											(double) Mth.sin(self.getYRot() * ((float) Math.PI / 180F)),
@@ -345,7 +345,7 @@ public abstract class PlayerMixin {
 								}
 							}
 
-							self.level.playSound((Player) null, self.getX(), self.getY(), self.getZ(),
+							self.level().playSound((Player) null, self.getX(), self.getY(), self.getZ(),
 									SoundEvents.PLAYER_ATTACK_SWEEP, self.getSoundSource(), 1.0F, 1.0F);
 							self.sweepAttack();
 						}
@@ -357,17 +357,17 @@ public abstract class PlayerMixin {
 						}
 
 						if (isCriticalHit) {
-							self.level.playSound((Player) null, self.getX(), self.getY(), self.getZ(),
+							self.level().playSound((Player) null, self.getX(), self.getY(), self.getZ(),
 									SoundEvents.PLAYER_ATTACK_CRIT, self.getSoundSource(), 1.0F, 1.0F);
 							self.crit(target);
 						}
 
 						if (!isCriticalHit && !canAttackSweep) {
 							if (isAttackTimerOk) {
-								self.level.playSound((Player) null, self.getX(), self.getY(), self.getZ(),
+								self.level().playSound((Player) null, self.getX(), self.getY(), self.getZ(),
 										SoundEvents.PLAYER_ATTACK_STRONG, self.getSoundSource(), 1.0F, 1.0F);
 							} else {
-								self.level.playSound((Player) null, self.getX(), self.getY(), self.getZ(),
+								self.level().playSound((Player) null, self.getX(), self.getY(), self.getZ(),
 										SoundEvents.PLAYER_ATTACK_WEAK, self.getSoundSource(), 1.0F, 1.0F);
 							}
 						}
@@ -388,7 +388,7 @@ public abstract class PlayerMixin {
 							entity = ((net.minecraftforge.entity.PartEntity<?>) target).getParent();
 						}
 
-						if (!self.level.isClientSide && !itemstack1.isEmpty() && entity instanceof LivingEntity) {
+						if (!self.level().isClientSide && !itemstack1.isEmpty() && entity instanceof LivingEntity) {
 							ItemStack copy = itemstack1.copy();
 							itemstack1.hurtEnemy((LivingEntity) entity, self);
 							if (itemstack1.isEmpty()) {
@@ -405,9 +405,9 @@ public abstract class PlayerMixin {
 								target.setSecondsOnFire(hasFireAspect * 4);
 							}
 
-							if (self.level instanceof ServerLevel && damageDealt > 2.0F) {
+							if (self.level() instanceof ServerLevel && damageDealt > 2.0F) {
 								int hasEnoughDamageForParticles = (int) ((double) damageDealt * 0.5D);
-								((ServerLevel) self.level).sendParticles(ParticleTypes.DAMAGE_INDICATOR, target.getX(),
+								((ServerLevel) self.level()).sendParticles(ParticleTypes.DAMAGE_INDICATOR, target.getX(),
 										target.getY(0.5D), target.getZ(), hasEnoughDamageForParticles, 0.1D, 0.0D, 0.1D,
 										0.2D);
 							}
@@ -415,7 +415,7 @@ public abstract class PlayerMixin {
 
 						self.causeFoodExhaustion(0.1F);
 					} else {
-						self.level.playSound((Player) null, self.getX(), self.getY(), self.getZ(),
+						self.level().playSound((Player) null, self.getX(), self.getY(), self.getZ(),
 								SoundEvents.PLAYER_ATTACK_NODAMAGE, self.getSoundSource(), 1.0F, 1.0F);
 						if (shouldSetOnFire) {
 							target.clearFire();

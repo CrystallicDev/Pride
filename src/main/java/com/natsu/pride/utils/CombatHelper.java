@@ -49,7 +49,7 @@ public class CombatHelper {
 			//getAttackStrengthScale is overriden by PlayerMixin.
 			boolean isAttackTimerOk = player.getAttackStrengthScale(0.5F) > 0.9F;
 			if (player.isSprinting() && isAttackTimerOk) {
-				player.level.playSound((Player) null, player.getX(), player.getY(), player.getZ(),
+				player.level().playSound((Player) null, player.getX(), player.getY(), player.getZ(),
 						SoundEvents.PLAYER_ATTACK_KNOCKBACK, player.getSoundSource(), 1.0F, 1.0F);
 				++attackKnockback;
 			}
@@ -124,7 +124,7 @@ public class CombatHelper {
 	
 	public static boolean isCritical(Player player, Entity target) {
 		boolean isAttackTimerOk = player.getAttackStrengthScale(0.5F) > 0.9F;			// getAttackStrengthScale should be bypassed by a Mixin in PlayerMixin using Pride's authority
-		return isAttackTimerOk && player.fallDistance > 0.0F && !player.isOnGround()
+		return isAttackTimerOk && player.fallDistance > 0.0F && !player.onGround()
 				&& !player.onClimbable() && !player.isInWater() && !player.hasEffect(MobEffects.BLINDNESS)
 				&& !player.isPassenger() && target instanceof LivingEntity;
 	}
@@ -136,7 +136,7 @@ public class CombatHelper {
 		boolean sprintAndAttackTimerOk = player.isSprinting() && isAttackTimerOk;
 		boolean canAttackSweep = false;
 		double walkDistanceDelta = (double) (player.walkDist - player.walkDistO);
-		if (isAttackTimerOk && !isCritical(player, target) && !sprintAndAttackTimerOk && player.isOnGround()
+		if (isAttackTimerOk && !isCritical(player, target) && !sprintAndAttackTimerOk && player.onGround()
 				&& walkDistanceDelta < (double) player.getSpeed()) {
 			ItemStack itemstack = player.getItemInHand(InteractionHand.MAIN_HAND);
 			canAttackSweep = itemstack.canPerformAction(net.minecraftforge.common.ToolActions.SWORD_SWEEP);
@@ -150,16 +150,16 @@ public class CombatHelper {
 		boolean isAttackTimerOk = self.getAttackStrengthScale(0.5F) > 0.9F;
 
 		if (isCriticalHit && ServerConfig.PLAY_CRIT_SOUNDS.get()) {
-			self.level.playSound((Player) null, self.getX(), self.getY(), self.getZ(),
+			self.level().playSound((Player) null, self.getX(), self.getY(), self.getZ(),
 					SoundEvents.PLAYER_ATTACK_CRIT, self.getSoundSource(), 1.0F, 1.0F);
 		}
 
 		if (!isCriticalHit && !canSweep) {
 			if (isAttackTimerOk && ServerConfig.PLAY_STRONG_HIT_SOUNDS.get()) {
-				self.level.playSound((Player) null, self.getX(), self.getY(), self.getZ(),
+				self.level().playSound((Player) null, self.getX(), self.getY(), self.getZ(),
 						SoundEvents.PLAYER_ATTACK_STRONG, self.getSoundSource(), 1.0F, 1.0F);
 			} else if (!isAttackTimerOk && ServerConfig.PLAY_WEAK_HIT_SOUNDS.get()) {
-				self.level.playSound((Player) null, self.getX(), self.getY(), self.getZ(),
+				self.level().playSound((Player) null, self.getX(), self.getY(), self.getZ(),
 						SoundEvents.PLAYER_ATTACK_WEAK, self.getSoundSource(), 1.0F, 1.0F);
 			}
 		}

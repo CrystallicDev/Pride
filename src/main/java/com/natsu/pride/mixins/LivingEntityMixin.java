@@ -72,7 +72,7 @@ public class LivingEntityMixin {
 		if (!(self instanceof Player player)) return;
 		if (player.getAbilities().flying) return;
 		if (!(self.isEffectiveAi() || self.isControlledByLocalInstance())) return;
-		FluidState fluid = self.level.getFluidState(self.blockPosition());
+		FluidState fluid = self.level().getFluidState(self.blockPosition());
 		if (!self.isInWater() || self.canStandOnFluid(fluid)) return;
 
 		double startY = self.getY();
@@ -80,7 +80,7 @@ public class LivingEntityMixin {
 		float accel = 0.02F;
 		float depthStrider = EnchantmentHelper.getDepthStrider(self);
 		if (depthStrider > 3.0F) depthStrider = 3.0F;
-		if (!self.isOnGround()) depthStrider *= 0.5F;
+		if (!self.onGround()) depthStrider *= 0.5F;
 		if (depthStrider > 0.0F) {
 			friction += (0.54600006F - friction) * depthStrider / 3.0F;
 			accel += (self.getSpeed() - accel) * depthStrider / 3.0F;
@@ -106,7 +106,7 @@ public class LivingEntityMixin {
 	// équivalent du isFree(x,y,z) privé de Entity
 	private static boolean isFree(LivingEntity self, double x, double y, double z) {
 		AABB box = self.getBoundingBox().move(x, y, z);
-		return self.level.noCollision(self, box) && !self.level.containsAnyLiquid(box);
+		return self.level().noCollision(self, box) && !self.level().containsAnyLiquid(box);
 	}
 
 	@Inject(method = "tickHeadTurn", at = @At("HEAD"), cancellable = true)

@@ -50,7 +50,7 @@ public class FishHookMixin {
 		motionY = (motionY / len) * speed;
 		motionZ = (motionZ / len) * speed;
 
-		RandomSource rand = hook.getLevel().getRandom();
+		RandomSource rand = hook.level().getRandom();
 		motionX += rand.nextGaussian() * 0.0075D * inaccuracy;
 		motionY += rand.nextGaussian() * 0.0075D * inaccuracy;
 		motionZ += rand.nextGaussian() * 0.0075D * inaccuracy;
