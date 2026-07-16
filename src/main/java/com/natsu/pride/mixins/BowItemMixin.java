@@ -4,7 +4,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 
-import com.natsu.pride.config.ServerConfig;
+import com.natsu.pride.features.PrideFeature;
 
 import net.minecraft.world.item.BowItem;
 
@@ -17,7 +17,7 @@ public class BowItemMixin {
 					target = "Lnet/minecraft/world/entity/projectile/AbstractArrow;shootFromRotation(Lnet/minecraft/world/entity/Entity;FFFFF)V"),
 			index = 5)
 	private float removeArrowDispersion(float inaccuracy) {
-		if (ServerConfig.loaded() && ServerConfig.REMOVE_ARROW_DISPERSION.get()) {
+		if (PrideFeature.REMOVE_ARROW_DISPERSION.enabled()) {
 			return 0.0F;
 		}
 		return inaccuracy;

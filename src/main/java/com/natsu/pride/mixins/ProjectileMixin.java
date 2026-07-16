@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import com.natsu.pride.config.ServerConfig;
+import com.natsu.pride.features.PrideFeature;
 
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -21,7 +21,7 @@ public class ProjectileMixin {
 	@WrapOperation(method = "shootFromRotation",
 			at = @At(value = "INVOKE", target = "Lnet/minecraft/world/phys/Vec3;add(DDD)Lnet/minecraft/world/phys/Vec3;"))
 	private Vec3 noVelocityInherit(Vec3 arrowDelta, double x, double y, double z, Operation<Vec3> original) {
-		if (ServerConfig.loaded() && ServerConfig.REVERT_BOW.get() && (Object) this instanceof AbstractArrow) {
+		if (PrideFeature.REVERT_BOW.enabled() && (Object) this instanceof AbstractArrow) {
 			return arrowDelta;
 		}
 		return original.call(arrowDelta, x, y, z);
@@ -33,7 +33,7 @@ public class ProjectileMixin {
 			at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/projectile/Projectile;leftOwner:Z", opcode = Opcodes.GETFIELD))
 	private boolean allowSelfHitAfterDelay(boolean leftOwner) {
 		if (leftOwner) return true;
-		if (!ServerConfig.loaded() || !ServerConfig.REVERT_BOW.get()) return false;
+		if (!PrideFeature.REVERT_BOW.enabled()) return false;
 		Projectile self = (Projectile) (Object) this;
 		return self instanceof AbstractArrow && self.tickCount >= 5;
 	}
