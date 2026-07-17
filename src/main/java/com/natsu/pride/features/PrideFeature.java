@@ -16,29 +16,43 @@ import net.minecraftforge.common.ForgeConfigSpec;
  */
 public enum PrideFeature {
 
-	REVERT_DAMAGE_LOGIC(ServerConfig.REVERT_DAMAGE_LOGIC),
-	REVERT_KNOCKBACK(ServerConfig.REVERT_KNOCKBACK),
-	ALLOW_SWORD_BLOCKING(ServerConfig.ALLOW_SWORD_BLOCKING),
-	DISABLE_SWORD_ATTACK_COOLDOWN(ServerConfig.DISABLE_SWORD_ATTACK_COOLDOWN),
-	DISABLE_SWEEPING_ATTACKS(ServerConfig.DISABLE_SWEEPING_ATTACKS),
-	DISABLE_AXE_ATTACK_COOLDOWN(ServerConfig.DISABLE_AXE_ATTACK_COOLDOWN),
-	REMOVE_ARROW_DISPERSION(ServerConfig.REMOVE_ARROW_DISPERSION),
-	REVERT_BOW(ServerConfig.REVERT_BOW),
-	REVERT_FISHING_ROD(ServerConfig.REVERT_FISHING_ROD),
-	SHIELDS_ONLY_BLOCK_PROJECTILES(ServerConfig.SHIELDS_ONLY_BLOCK_PROJECTILES),
-	DISABLE_SWIMMING(ServerConfig.DISABLE_SWIMMING),
-	SLOW_WHILE_USING_ITEM(ServerConfig.SLOW_WHILE_USING_ITEM),
-	PLAY_CRIT_SOUNDS(ServerConfig.PLAY_CRIT_SOUNDS),
-	PLAY_STRONG_HIT_SOUNDS(ServerConfig.PLAY_STRONG_HIT_SOUNDS),
-	PLAY_WEAK_HIT_SOUNDS(ServerConfig.PLAY_WEAK_HIT_SOUNDS),
-	CHANGE_BODY_RENDER(ServerConfig.CHANGE_BODY_RENDER),
-	REMOVE_BUCKET_ANIMATION(ServerConfig.REMOVE_BUCKET_ANIMATION),
-	REMOVE_DROP_SWING(ServerConfig.REMOVE_DROP_SWING);
+	REVERT_DAMAGE_LOGIC("revertDamageLogic", ServerConfig.REVERT_DAMAGE_LOGIC),
+	REVERT_KNOCKBACK("revertKnockback", ServerConfig.REVERT_KNOCKBACK),
+	ALLOW_SWORD_BLOCKING("allowSwordBlocking", ServerConfig.ALLOW_SWORD_BLOCKING),
+	DISABLE_SWORD_ATTACK_COOLDOWN("disableSwordCooldown", ServerConfig.DISABLE_SWORD_ATTACK_COOLDOWN),
+	DISABLE_SWEEPING_ATTACKS("disableSweepingAttacks", ServerConfig.DISABLE_SWEEPING_ATTACKS),
+	DISABLE_AXE_ATTACK_COOLDOWN("disableAxesCooldown", ServerConfig.DISABLE_AXE_ATTACK_COOLDOWN),
+	REMOVE_ARROW_DISPERSION("removeArrowDispersion", ServerConfig.REMOVE_ARROW_DISPERSION),
+	REVERT_BOW("revertBow", ServerConfig.REVERT_BOW),
+	REVERT_FISHING_ROD("revertFishingRod", ServerConfig.REVERT_FISHING_ROD),
+	SHIELDS_ONLY_BLOCK_PROJECTILES("shieldsOnlyBlockProjectiles", ServerConfig.SHIELDS_ONLY_BLOCK_PROJECTILES),
+	DISABLE_SWIMMING("disableSwimming", ServerConfig.DISABLE_SWIMMING),
+	SLOW_WHILE_USING_ITEM("slowWhileUsingItem", ServerConfig.SLOW_WHILE_USING_ITEM),
+	PLAY_CRIT_SOUNDS("playCriticalHitSounds", ServerConfig.PLAY_CRIT_SOUNDS),
+	PLAY_STRONG_HIT_SOUNDS("playStrongHitSounds", ServerConfig.PLAY_STRONG_HIT_SOUNDS),
+	PLAY_WEAK_HIT_SOUNDS("playWeakHitSounds", ServerConfig.PLAY_WEAK_HIT_SOUNDS),
+	CHANGE_BODY_RENDER("changeBodyRender", ServerConfig.CHANGE_BODY_RENDER),
+	REMOVE_BUCKET_ANIMATION("removeBucketAnimation", ServerConfig.REMOVE_BUCKET_ANIMATION),
+	REMOVE_DROP_SWING("removeDropSwingAnimation", ServerConfig.REMOVE_DROP_SWING);
 
+	/** Clé stable utilisée sur le réseau (= clé de config) : découple le protocole de l'ordre de l'enum. */
+	private final String key;
 	private final ForgeConfigSpec.BooleanValue standaloneValue;
 
-	PrideFeature(ForgeConfigSpec.BooleanValue standaloneValue) {
+	PrideFeature(String key, ForgeConfigSpec.BooleanValue standaloneValue) {
+		this.key = key;
 		this.standaloneValue = standaloneValue;
+	}
+
+	public String key() {
+		return key;
+	}
+
+	public static PrideFeature byKey(String key) {
+		for (PrideFeature f : values()) {
+			if (f.key.equals(key)) return f;
+		}
+		return null;
 	}
 
 	public boolean enabled() {

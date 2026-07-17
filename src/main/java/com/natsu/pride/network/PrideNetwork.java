@@ -1,0 +1,85 @@
+package com.natsu.pride.network;
+
+import java.util.EnumSet;
+import java.util.Set;
+
+import org.slf4j.Logger;
+
+import com.mojang.logging.LogUtils;
+import com.natsu.pride.Pride;
+import com.natsu.pride.features.PrideFeature;
+
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.network.NetworkRegistry;
+import net.minecraftforge.network.event.EventNetworkChannel;
+
+/**
+ * Canal de pilotage par le serveur (plugin Paper / proxy). Le mod ECOUTE seulement : un serveur
+ * envoie sur {@code pride:features} la liste des features à activer côté client, ce qui bascule
+ * {@link PrideFeature} en mode PILOTED. Canal OPTIONNEL (acceptMissingOr) : la connexion à un
+ * serveur sans ce canal (vanilla, Paper nu, Forge sans Pride) reste possible, features à off.
+ *
+ * <p>Format du payload (clientbound), versionné pour rester compatible avec des plugins tiers :
+ * <pre>
+ *   byte    version           (actuellement 1)
+ *   float   blockingReduction (réduction de dégâts en blocage épée, 0..1)
+ *   varInt  count
+ *   count × Utf(featureKey)   clés des features ACTIVÉES (cf. PrideFeature#key, ex. "revertKnockback")
+ * </pre>
+ * Une clé inconnue est ignorée (compat ascendante) ; une version inconnue fait ignorer le message.
+ */
+public final class PrideNetwork {
+
+	private static final Logger LOGGER = LogUtils.getLogger();
+
+	public static final ResourceLocation CHANNEL_ID = new ResourceLocation(Pride.MODID, "features");
+	private static final String PROTOCOL_VERSION = "1";
+	private static final byte PAYLOAD_VERSION = 1;
+
+	private static EventNetworkChannel channel;
+
+	private PrideNetwork() {}
+
+	public static void register() {
+		channel = NetworkRegistry.newEventChannel(
+				CHANNEL_ID,
+				() -> PROTOCOL_VERSION,
+				NetworkRegistry.acceptMissingOr(PROTOCOL_VERSION),
+				NetworkRegistry.acceptMissingOr(PROTOCOL_VERSION));
+		channel.addListener(PrideNetwork::onPayload);
+	}
+
+	private static void onPayload(NetworkEvent event) {
+		NetworkEvent.Context ctx = event.getSource().get();
+		ctx.setPacketHandled(true);
+		// getSender() != null => reçu côté serveur (venant d'un client) : on n'écoute que côté client.
+		if (ctx.getSender() != null) return;
+
+		FriendlyByteBuf buf = event.getPayload();
+		if (buf == null) return;
+		// Copie des octets tant qu'on est sur le thread réseau (le buffer est libéré après).
+		Set<PrideFeature> features = EnumSet.noneOf(PrideFeature.class);
+		double blockingReduction;
+		try {
+			byte version = buf.readByte();
+			if (version != PAYLOAD_VERSION) {
+				LOGGER.warn("[Pride] version de payload inconnue ({}), message ignoré", version);
+				return;
+			}
+			blockingReduction = buf.readFloat();
+			int count = buf.readVarInt();
+			for (int i = 0; i < count; i++) {
+				String key = buf.readUtf();
+				PrideFeature f = PrideFeature.byKey(key);
+				if (f != null) features.add(f);
+			}
+		} catch (Exception e) {
+			LOGGER.warn("[Pride] payload de pilotage illisible, message ignoré", e);
+			return;
+		}
+
+		ctx.enqueueWork(() -> PrideFeature.setPiloted(features, blockingReduction));
+	}
+}

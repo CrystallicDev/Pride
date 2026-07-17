@@ -2,6 +2,7 @@ package com.natsu.pride;
 
 import com.llamalad7.mixinextras.MixinExtrasBootstrap;
 import com.natsu.pride.config.ServerConfig;
+import com.natsu.pride.network.PrideNetwork;
 
 import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -19,6 +20,7 @@ public class Pride {
     	// toutes les features restent alors désactivées (voir PrideFeature).
     	ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class,
     			() -> new IExtensionPoint.DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (remote, isServer) -> true));
+    	PrideNetwork.register();
     	MixinExtrasBootstrap.init();
     }
 
