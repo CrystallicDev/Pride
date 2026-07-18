@@ -5,7 +5,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.natsu.pride.Pride;
-import com.natsu.pride.config.ServerConfig;
+import com.natsu.pride.features.PrideFeature;
 
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
@@ -24,7 +24,7 @@ public class FishHookMixin {
 
 	@Inject(method = "<init>(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/level/Level;II)V", at = @At("TAIL"))
 	private void onInit(Player p_37106_, Level p_37107_, int p_37108_, int p_37109_, CallbackInfo ci) {
-		if (!ServerConfig.REVERT_FISHING_ROD.get()) return;
+		if (!PrideFeature.REVERT_FISHING_ROD.enabled()) return;
 		
 		FishingHook hook = (FishingHook)(Object)this;
 		Player player = hook.getOwner() instanceof Player p ? p : null;
@@ -60,7 +60,7 @@ public class FishHookMixin {
 
 	@Inject(method = "onHitEntity", at = @At("HEAD"), cancellable = true)
     private void onHitEntity(EntityHitResult result, CallbackInfo ci) {
-		if (!ServerConfig.REVERT_FISHING_ROD.get()) return;
+		if (!PrideFeature.REVERT_FISHING_ROD.enabled()) return;
         FishingHook hook = (FishingHook)(Object)this;
         Entity target = result.getEntity();
         Entity owner = hook.getOwner();

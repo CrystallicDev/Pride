@@ -9,7 +9,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import com.natsu.pride.config.ServerConfig;
+import com.natsu.pride.features.PrideFeature;
 
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.ItemInHandRenderer;
@@ -33,7 +33,7 @@ public class ItemInHandRendererMixin {
 	private void applyBlockingPose(AbstractClientPlayer player, float partialTicks, float pitch,
 			InteractionHand hand, float swingProgress, ItemStack stack, float equippedProgress,
 			PoseStack poseStack, MultiBufferSource buffer, int combinedLight, CallbackInfo ci) {
-		if (!ServerConfig.loaded() || !ServerConfig.ALLOW_SWORD_BLOCKING.get()) return;
+		if (!PrideFeature.ALLOW_SWORD_BLOCKING.enabled()) return;
 		if (!(stack.getItem() instanceof SwordItem)) return;
 		if (!player.isUsingItem() || player.getUseItemRemainingTicks() <= 0) return;
 		if (player.getUsedItemHand() != hand) return;
@@ -62,7 +62,7 @@ public class ItemInHandRendererMixin {
 					remap = false))
 	private boolean removeBucketReequipAnimation(ItemStack from, ItemStack to, int slot, Operation<Boolean> original) {
 		boolean requip = original.call(from, to, slot);
-		if (requip && ServerConfig.loaded() && ServerConfig.REMOVE_BUCKET_ANIMATION.get()
+		if (requip && PrideFeature.REMOVE_BUCKET_ANIMATION.enabled()
 				&& pride$isBucketLike(from) && pride$isBucketLike(to)) {
 			return false;
 		}

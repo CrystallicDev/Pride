@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import com.natsu.pride.config.ServerConfig;
+import com.natsu.pride.features.PrideFeature;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -20,7 +20,7 @@ public class MinecraftMixin {
 	// swing visible en bloquant : on consomme les clics d'attaque pour l'anim seule
 	@Inject(method = "handleKeybinds", at = @At("HEAD"))
 	private void swingWhileBlocking(CallbackInfo ci) {
-		if (!ServerConfig.loaded() || !ServerConfig.ALLOW_SWORD_BLOCKING.get()) return;
+		if (!PrideFeature.ALLOW_SWORD_BLOCKING.enabled()) return;
 		Minecraft mc = Minecraft.getInstance();
 		LocalPlayer player = mc.player;
 		if (player == null || !player.isUsingItem()) return;
@@ -35,7 +35,7 @@ public class MinecraftMixin {
 			at = @At(value = "INVOKE",
 					target = "Lnet/minecraft/client/player/LocalPlayer;swing(Lnet/minecraft/world/InteractionHand;)V"))
 	private void removeInWorldDropSwing(LocalPlayer instance, InteractionHand hand, Operation<Void> original) {
-		if (ServerConfig.loaded() && ServerConfig.REMOVE_DROP_SWING.get()) return;
+		if (PrideFeature.REMOVE_DROP_SWING.enabled()) return;
 		original.call(instance, hand);
 	}
 
