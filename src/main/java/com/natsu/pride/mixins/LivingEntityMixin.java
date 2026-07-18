@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import com.natsu.pride.config.ServerConfig;
+import com.natsu.pride.features.PrideFeature;
 
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
@@ -29,7 +29,7 @@ public class LivingEntityMixin {
 
 	@Inject(method = "isDamageSourceBlocked", at = @At("HEAD"), cancellable = true)
 	private void onlyBlockProjectiles(DamageSource source, CallbackInfoReturnable<Boolean> cir) {
-		if (ServerConfig.loaded() && ServerConfig.SHIELDS_ONLY_BLOCK_PROJECTILES.get()
+		if (PrideFeature.SHIELDS_ONLY_BLOCK_PROJECTILES.enabled()
 				&& !source.isProjectile()) {
 			cir.setReturnValue(false);
 		}
@@ -39,7 +39,7 @@ public class LivingEntityMixin {
 	// qui s'applique à chaque coup (la 1.18 ne soulève que si la cible est au sol).
 	@Inject(method = "knockback", at = @At("HEAD"), cancellable = true)
 	private void oldSchoolKnockback(double strength, double x, double z, CallbackInfo ci) {
-		if (!ServerConfig.loaded() || !ServerConfig.REVERT_KNOCKBACK.get()) return;
+		if (!PrideFeature.REVERT_KNOCKBACK.enabled()) return;
 		LivingEntity self = (LivingEntity) (Object) this;
 		LivingKnockBackEvent event = ForgeHooks.onLivingKnockBack(self, (float) strength, x, z);
 		if (event.isCanceled()) {
@@ -67,7 +67,7 @@ public class LivingEntityMixin {
 	// terme Depth Strider basé sur getSpeed() (sprint inclus, comme getAIMoveSpeed 1.8.9).
 	@Inject(method = "travel", at = @At("HEAD"), cancellable = true)
 	private void oldSchoolWaterMovement(Vec3 input, CallbackInfo ci) {
-		if (!ServerConfig.loaded() || !ServerConfig.DISABLE_SWIMMING.get()) return;
+		if (!PrideFeature.DISABLE_SWIMMING.enabled()) return;
 		LivingEntity self = (LivingEntity) (Object) this;
 		if (!(self instanceof Player player)) return;
 		if (player.getAbilities().flying) return;
@@ -111,7 +111,7 @@ public class LivingEntityMixin {
 
 	@Inject(method = "tickHeadTurn", at = @At("HEAD"), cancellable = true)
 	private void oldSchoolBodyRotation(float targetYaw, float dist, CallbackInfoReturnable<Float> cir) {
-		if (!ServerConfig.loaded() || !ServerConfig.CHANGE_BODY_RENDER.get()) return;
+		if (!PrideFeature.CHANGE_BODY_RENDER.enabled()) return;
 		LivingEntity self = (LivingEntity) (Object) this;
 		if (!(self instanceof Player)) return;
 
@@ -130,7 +130,7 @@ public class LivingEntityMixin {
 	// retire le retournement du corps en marche arrière (ajouté en 1.9)
 	@ModifyConstant(method = "tick", constant = @Constant(floatValue = 95.0F), require = 0)
 	private float removeBackwardsBodyFlip(float value) {
-		if (ServerConfig.loaded() && ServerConfig.CHANGE_BODY_RENDER.get()
+		if (PrideFeature.CHANGE_BODY_RENDER.enabled()
 				&& (Object) this instanceof Player) {
 			return Float.MAX_VALUE;
 		}

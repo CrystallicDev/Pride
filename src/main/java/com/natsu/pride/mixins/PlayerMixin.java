@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import com.natsu.pride.config.ServerConfig;
+import com.natsu.pride.features.PrideFeature;
 import com.natsu.pride.utils.CombatHelper;
 
 import net.minecraft.core.particles.ParticleTypes;
@@ -48,25 +48,25 @@ public abstract class PlayerMixin {
 			at = @At(value = "INVOKE",
 					target = "Lnet/minecraft/world/entity/player/Player;swing(Lnet/minecraft/world/InteractionHand;)V"))
 	private void removeInventoryDropSwing(Player instance, InteractionHand hand, Operation<Void> original) {
-		if (ServerConfig.loaded() && ServerConfig.REMOVE_DROP_SWING.get()) return;
+		if (PrideFeature.REMOVE_DROP_SWING.enabled()) return;
 		original.call(instance, hand);
 	}
 
 	// pas de nage (1.8.9)
 	@Inject(method = "updateSwimming", at = @At("HEAD"), cancellable = true)
 	private void preventSwimming(CallbackInfo ci) {
-		if (!ServerConfig.loaded() || !ServerConfig.DISABLE_SWIMMING.get()) return;
+		if (!PrideFeature.DISABLE_SWIMMING.enabled()) return;
 		((Player) (Object) this).setSwimming(false);
 		ci.cancel();
 	}
 
 	@Inject(method = "getAttackStrengthScale", at = @At("HEAD"), cancellable = true)
 	public void getAttackStrengthScale(float f, CallbackInfoReturnable<Float> cir) {
-	    if (!ServerConfig.loaded()) return;
+	    if (!PrideFeature.active()) return;
 	    Player self = (Player) (Object) this;
 	    ItemStack item = self.getMainHandItem();
-	    if ((ServerConfig.DISABLE_AXE_ATTACK_COOLDOWN.get() && item.getItem() instanceof AxeItem) ||
-	        (ServerConfig.DISABLE_SWORD_ATTACK_COOLDOWN.get() && !(item.getItem() instanceof AxeItem))) {
+	    if ((PrideFeature.DISABLE_AXE_ATTACK_COOLDOWN.enabled() && item.getItem() instanceof AxeItem) ||
+	        (PrideFeature.DISABLE_SWORD_ATTACK_COOLDOWN.enabled() && !(item.getItem() instanceof AxeItem))) {
 	        cir.setReturnValue(1.0F);
 	    }
 	}
@@ -75,7 +75,7 @@ public abstract class PlayerMixin {
     @Inject(method = "actuallyHurt", at = @At("HEAD"), cancellable = true)
     private void reduceParryDamage(DamageSource source, float amount, CallbackInfo ci) {
         if (isReducingParryDamage) return;
-        if (!ServerConfig.loaded() || !ServerConfig.ALLOW_SWORD_BLOCKING.get()) return;
+        if (!PrideFeature.ALLOW_SWORD_BLOCKING.enabled()) return;
 
         Player self = (Player)(Object) this;
 
@@ -85,7 +85,7 @@ public abstract class PlayerMixin {
         if (source.isBypassArmor()) return;
         if (source.getEntity() == null) return;
 
-        amount = (1.0F + amount) * (1 - ServerConfig.BLOCKING_DAMAGE_REDUCTION.get().floatValue());
+        amount = (1.0F + amount) * (1 - (float) PrideFeature.blockingDamageReduction());
         
         isReducingParryDamage = true;
         ((PlayerAccessor)(Object)self).invokeActuallyHurt(source, amount);
@@ -99,7 +99,7 @@ public abstract class PlayerMixin {
 		Player self = (Player) (Object) this;
 
 		// en bloquant : swing autorisé, mais pas de vrai coup
-		if (ServerConfig.loaded() && ServerConfig.ALLOW_SWORD_BLOCKING.get()
+		if (PrideFeature.ALLOW_SWORD_BLOCKING.enabled()
 				&& self.isUsingItem() && self.getUseItem().getItem() instanceof SwordItem) {
 			ci.cancel();
 			return;
@@ -220,7 +220,7 @@ public abstract class PlayerMixin {
 							}
 
 							// particules de dégâts (coeurs) : elles n'existent pas en 1.8
-							if (!ServerConfig.REVERT_DAMAGE_LOGIC.get() && self.level instanceof ServerLevel && damageDealt > 2.0F) {
+							if (!PrideFeature.REVERT_DAMAGE_LOGIC.enabled() && self.level instanceof ServerLevel && damageDealt > 2.0F) {
 								int hasEnoughDamageForParticles = (int) ((double) damageDealt * 0.5D);
 								((ServerLevel) self.level).sendParticles(ParticleTypes.DAMAGE_INDICATOR, targetEntity.getX(),
 										targetEntity.getY(0.5D), targetEntity.getZ(), hasEnoughDamageForParticles, 0.1D, 0.0D, 0.1D,
@@ -228,7 +228,7 @@ public abstract class PlayerMixin {
 							}
 						}
 					} else {
-						if (ServerConfig.PLAY_WEAK_HIT_SOUNDS.get()) {
+						if (PrideFeature.PLAY_WEAK_HIT_SOUNDS.enabled()) {
 							self.level.playSound((Player) null, self.getX(), self.getY(), self.getZ(),
 									SoundEvents.PLAYER_ATTACK_NODAMAGE, self.getSoundSource(), 1.0F, 1.0F);
 						}

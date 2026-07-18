@@ -5,7 +5,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import com.natsu.pride.config.ServerConfig;
+import com.natsu.pride.features.PrideFeature;
 
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -23,7 +23,7 @@ public class ItemMixin {
 	@Inject(method = "use", at = @At("HEAD"), cancellable = true)
 	private void onUse(Level level, Player player, InteractionHand hand,
 			CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
-		if (!ServerConfig.loaded() || !ServerConfig.ALLOW_SWORD_BLOCKING.get()) return;
+		if (!PrideFeature.ALLOW_SWORD_BLOCKING.enabled()) return;
 
 		ItemStack stack = player.getItemInHand(hand);
 		if (!(stack.getItem() instanceof SwordItem)) return;
@@ -36,7 +36,7 @@ public class ItemMixin {
 
 	@Inject(method = "getUseDuration", at = @At("HEAD"), cancellable = true)
 	private void getUseDuration(ItemStack stack, CallbackInfoReturnable<Integer> cir) {
-		if (!ServerConfig.loaded() || !ServerConfig.ALLOW_SWORD_BLOCKING.get()) return;
+		if (!PrideFeature.ALLOW_SWORD_BLOCKING.enabled()) return;
 		if (stack.getItem() instanceof SwordItem) {
 			cir.setReturnValue(7200);
 		}
@@ -44,7 +44,7 @@ public class ItemMixin {
 
 	@Inject(method = "getUseAnimation", at = @At("HEAD"), cancellable = true)
 	private void getUseAnimation(ItemStack stack, CallbackInfoReturnable<UseAnim> cir) {
-		if (!ServerConfig.loaded() || !ServerConfig.ALLOW_SWORD_BLOCKING.get()) return;
+		if (!PrideFeature.ALLOW_SWORD_BLOCKING.enabled()) return;
 		if (stack.getItem() instanceof SwordItem) {
 			cir.setReturnValue(UseAnim.BLOCK);
 		}

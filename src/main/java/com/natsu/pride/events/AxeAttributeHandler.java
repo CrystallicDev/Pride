@@ -3,6 +3,7 @@ package com.natsu.pride.events;
 import java.util.UUID;
 
 import com.natsu.pride.Pride;
+import com.natsu.pride.features.PrideFeature;
 
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -25,6 +26,7 @@ public class AxeAttributeHandler {
 
 	@SubscribeEvent
 	public static void onItemAttributes(ItemAttributeModifierEvent event) {
+		if (!PrideFeature.active()) return;
 		if (event.getSlotType() != EquipmentSlot.MAINHAND) return;
 		if (!(event.getItemStack().getItem() instanceof AxeItem)) return;
 
