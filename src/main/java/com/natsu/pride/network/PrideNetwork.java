@@ -73,7 +73,14 @@ public final class PrideNetwork {
 			for (int i = 0; i < count; i++) {
 				String key = buf.readUtf();
 				PrideFeature f = PrideFeature.byKey(key);
-				if (f != null) features.add(f);
+				if (f == null) continue;
+				// Une feature serveur (dégâts, knockback...) est du ressort du plugin : le client
+				// ne l'applique pas, sinon il prédit un état que le serveur ne confirme pas.
+				if (!f.pilotable()) {
+					LOGGER.warn("[Pride] feature serveur '{}' reçue mais ignorée (à gérer côté plugin)", key);
+					continue;
+				}
+				features.add(f);
 			}
 		} catch (Exception e) {
 			LOGGER.warn("[Pride] payload de pilotage illisible, message ignoré", e);
