@@ -19,7 +19,7 @@ import net.minecraft.world.phys.EntityHitResult;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-@Mixin(FishingHook.class)
+@Mixin(value = FishingHook.class, remap = false)
 public class FishHookMixin {
 
 	@Inject(method = "<init>(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/level/Level;II)V", at = @At("TAIL"))

@@ -1,27 +1,20 @@
 package com.natsu.pride;
 
-import com.llamalad7.mixinextras.MixinExtrasBootstrap;
 import com.natsu.pride.config.ServerConfig;
-import com.natsu.pride.network.PrideNetwork;
 
-import net.minecraftforge.fml.IExtensionPoint;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig.Type;
-import net.minecraftforge.network.NetworkConstants;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
 
 @Mod(Pride.MODID)
 public class Pride {
 	public static final String MODID = "pride";
 
-    public Pride() {
-    	ModLoadingContext.get().registerConfig(Type.SERVER, ServerConfig.SPEC);
-    	// Autorise la connexion aux serveurs sans Pride (vanilla, Paper, Forge sans le mod) :
-    	// toutes les features restent alors désactivées (voir PrideFeature).
-    	ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class,
-    			() -> new IExtensionPoint.DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (remote, isServer) -> true));
-    	PrideNetwork.register();
-    	MixinExtrasBootstrap.init();
-    }
+	// NeoForge fournit Mixin + MixinExtras et les initialise lui-même (pas de bootstrap manuel).
+	// Sans payload réseau requis, le mod peut rejoindre des serveurs vanilla/Paper (pas de DisplayTest).
+	public Pride(IEventBus modEventBus, ModContainer modContainer) {
+		modContainer.registerConfig(ModConfig.Type.SERVER, ServerConfig.SPEC);
+	}
 
 }

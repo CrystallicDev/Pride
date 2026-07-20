@@ -13,7 +13,7 @@ import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.phys.Vec3;
 
-@Mixin(Projectile.class)
+@Mixin(value = Projectile.class, remap = false)
 public class ProjectileMixin {
 
 	// 1.8.9 : les flèches n'héritent pas de la vélocité du tireur (le vanilla l'ajoute

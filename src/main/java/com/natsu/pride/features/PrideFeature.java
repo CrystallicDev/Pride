@@ -5,7 +5,7 @@ import java.util.Set;
 
 import com.natsu.pride.config.ServerConfig;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 /**
  * Source de vérité unique des features, consultée par tous les mixins.
@@ -44,9 +44,9 @@ public enum PrideFeature {
 	/** Clé stable utilisée sur le réseau (= clé de config) : découple le protocole de l'ordre de l'enum. */
 	private final String key;
 	private final Side side;
-	private final ForgeConfigSpec.BooleanValue standaloneValue;
+	private final ModConfigSpec.BooleanValue standaloneValue;
 
-	PrideFeature(String key, Side side, ForgeConfigSpec.BooleanValue standaloneValue) {
+	PrideFeature(String key, Side side, ModConfigSpec.BooleanValue standaloneValue) {
 		this.key = key;
 		this.side = side;
 		this.standaloneValue = standaloneValue;

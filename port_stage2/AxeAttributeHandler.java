@@ -9,16 +9,16 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.AxeItem;
-import net.minecraftforge.event.ItemAttributeModifierEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.ItemAttributeModifierEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /**
  * Réduit de 2 les dégâts de base de toute hache, via son modificateur d'attribut.
  * Passer par l'attribut (plutôt qu'au moment du coup) met à jour la valeur affichée
  * dans le tooltip en plus des dégâts réels.
  */
-@Mod.EventBusSubscriber(modid = Pride.MODID)
+@EventBusSubscriber(modid = Pride.MODID)
 public class AxeAttributeHandler {
 
 	// Item.BASE_ATTACK_DAMAGE_UUID (protected) : UUID du modificateur "dégâts de base" d'une arme.

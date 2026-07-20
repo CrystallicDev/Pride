@@ -2,16 +2,12 @@
     "required": true,
     "minVersion": "0.8",
     "package": "com.natsu.pride.mixins",
-    "refmap": "mixins.pride.refmap.json",
-    "compatibilityLevel": "JAVA_17",
+    "compatibilityLevel": "JAVA_21",
     "mixins": [
-        "FishHookMixin",
 		"PlayerAccessor",
 		"PlayerMixin",
 		"ItemMixin",
-		"BowItemMixin",
-		"LivingEntityMixin",
-		"ProjectileMixin"
+		"LivingEntityMixin"
     ],
     "client": [
 		"ItemInHandRendererMixin",

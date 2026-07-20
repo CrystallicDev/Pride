@@ -21,10 +21,8 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
 
-@Mixin(LivingEntity.class)
+@Mixin(value = LivingEntity.class, remap = false)
 public class LivingEntityMixin {
 
 	@Inject(method = "isDamageSourceBlocked", at = @At("HEAD"), cancellable = true)
@@ -33,33 +31,6 @@ public class LivingEntityMixin {
 				&& !source.is(net.minecraft.tags.DamageTypeTags.IS_PROJECTILE)) {
 			cir.setReturnValue(false);
 		}
-	}
-
-	// Knockback de base 1.8.9 : identique à la 1.18 sauf le soulèvement vertical,
-	// qui s'applique à chaque coup (la 1.18 ne soulève que si la cible est au sol).
-	@Inject(method = "knockback", at = @At("HEAD"), cancellable = true)
-	private void oldSchoolKnockback(double strength, double x, double z, CallbackInfo ci) {
-		if (!PrideFeature.REVERT_KNOCKBACK.enabled()) return;
-		LivingEntity self = (LivingEntity) (Object) this;
-		LivingKnockBackEvent event = ForgeHooks.onLivingKnockBack(self, (float) strength, x, z);
-		if (event.isCanceled()) {
-			ci.cancel();
-			return;
-		}
-		strength = event.getStrength();
-		x = event.getRatioX();
-		z = event.getRatioZ();
-		strength *= 1.0D - self.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
-		if (strength > 0.0D) {
-			self.hasImpulse = true;
-			Vec3 current = self.getDeltaMovement();
-			Vec3 push = new Vec3(x, 0.0D, z).normalize().scale(strength);
-			self.setDeltaMovement(
-					current.x / 2.0D - push.x,
-					Math.min(0.4D, current.y / 2.0D + strength),
-					current.z / 2.0D - push.z);
-		}
-		ci.cancel();
 	}
 
 	// Remplace intégralement le mouvement dans l'eau par celui de la 1.8.9 :
@@ -78,7 +49,9 @@ public class LivingEntityMixin {
 		double startY = self.getY();
 		float friction = 0.8F;
 		float accel = 0.02F;
-		float depthStrider = EnchantmentHelper.getDepthStrider(self);
+		// 1.21 : Depth Strider n'est plus un niveau d'enchant (0-3) mais l'attribut
+		// WATER_MOVEMENT_EFFICIENCY (0.0-1.0). On le remet sur l'échelle 0-3 de la formule 1.8.9.
+		float depthStrider = (float) self.getAttributeValue(Attributes.WATER_MOVEMENT_EFFICIENCY) * 3.0F;
 		if (depthStrider > 3.0F) depthStrider = 3.0F;
 		if (!self.onGround()) depthStrider *= 0.5F;
 		if (depthStrider > 0.0F) {

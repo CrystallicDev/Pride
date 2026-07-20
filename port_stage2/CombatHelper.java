@@ -81,7 +81,7 @@ public class CombatHelper {
 			}
 			//Slight change in the Critical Hits detection, to use forge's damage modifier hook
 			boolean isCriticalHit = isCritical(player, target);
-			net.minecraftforge.event.entity.player.CriticalHitEvent hitResult = net.minecraftforge.common.ForgeHooks
+			net.neoforged.neoforge.event.entity.player.CriticalHitEvent hitResult = net.neoforged.neoforge.common.CommonHooks
 					.getCriticalHit(player, target, isCriticalHit, isCriticalHit ? 1.5F : 1.0F);
 			isCriticalHit = hitResult != null;
 			if (isCriticalHit) {
@@ -110,7 +110,7 @@ public class CombatHelper {
 			
 			//Checking Sweep
 			boolean isCriticalHit = isCritical(player, target) && !player.isSprinting();
-			net.minecraftforge.event.entity.player.CriticalHitEvent hitResult = net.minecraftforge.common.ForgeHooks
+			net.neoforged.neoforge.event.entity.player.CriticalHitEvent hitResult = net.neoforged.neoforge.common.CommonHooks
 					.getCriticalHit(player, target, isCriticalHit, isCriticalHit ? 1.5F : 1.0F);
 			isCriticalHit = hitResult != null;
 			if (isCriticalHit) {
@@ -139,7 +139,7 @@ public class CombatHelper {
 		if (isAttackTimerOk && !isCritical(player, target) && !sprintAndAttackTimerOk && player.onGround()
 				&& walkDistanceDelta < (double) player.getSpeed()) {
 			ItemStack itemstack = player.getItemInHand(InteractionHand.MAIN_HAND);
-			canAttackSweep = itemstack.canPerformAction(net.minecraftforge.common.ToolActions.SWORD_SWEEP);
+			canAttackSweep = itemstack.canPerformAction(net.neoforged.neoforge.common.ItemAbilities.SWORD_SWEEP);
 		}
 		
 		return canAttackSweep;

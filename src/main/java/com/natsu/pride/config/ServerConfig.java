@@ -1,34 +1,34 @@
 package com.natsu.pride.config;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 public class ServerConfig {
 
-	public static final ForgeConfigSpec SPEC;
+	public static final ModConfigSpec SPEC;
 
-	public static final ForgeConfigSpec.BooleanValue REVERT_DAMAGE_LOGIC;
-	public static final ForgeConfigSpec.BooleanValue REVERT_KNOCKBACK;
-	public static final ForgeConfigSpec.BooleanValue ALLOW_SWORD_BLOCKING;
-	public static final ForgeConfigSpec.DoubleValue BLOCKING_DAMAGE_REDUCTION;
-	public static final ForgeConfigSpec.BooleanValue DISABLE_SWORD_ATTACK_COOLDOWN;
-	public static final ForgeConfigSpec.BooleanValue DISABLE_SWEEPING_ATTACKS;
-	public static final ForgeConfigSpec.BooleanValue DISABLE_AXE_ATTACK_COOLDOWN;
-	public static final ForgeConfigSpec.BooleanValue REMOVE_ARROW_DISPERSION;
-	public static final ForgeConfigSpec.BooleanValue REVERT_BOW;
-	public static final ForgeConfigSpec.BooleanValue REVERT_FISHING_ROD;
-	public static final ForgeConfigSpec.BooleanValue SHIELDS_ONLY_BLOCK_PROJECTILES;
-	public static final ForgeConfigSpec.BooleanValue DISABLE_SWIMMING;
-	public static final ForgeConfigSpec.BooleanValue SLOW_WHILE_USING_ITEM;
-	public static final ForgeConfigSpec.BooleanValue PLAY_CRIT_SOUNDS;
-	public static final ForgeConfigSpec.BooleanValue PLAY_STRONG_HIT_SOUNDS;
-	public static final ForgeConfigSpec.BooleanValue PLAY_WEAK_HIT_SOUNDS;
+	public static final ModConfigSpec.BooleanValue REVERT_DAMAGE_LOGIC;
+	public static final ModConfigSpec.BooleanValue REVERT_KNOCKBACK;
+	public static final ModConfigSpec.BooleanValue ALLOW_SWORD_BLOCKING;
+	public static final ModConfigSpec.DoubleValue BLOCKING_DAMAGE_REDUCTION;
+	public static final ModConfigSpec.BooleanValue DISABLE_SWORD_ATTACK_COOLDOWN;
+	public static final ModConfigSpec.BooleanValue DISABLE_SWEEPING_ATTACKS;
+	public static final ModConfigSpec.BooleanValue DISABLE_AXE_ATTACK_COOLDOWN;
+	public static final ModConfigSpec.BooleanValue REMOVE_ARROW_DISPERSION;
+	public static final ModConfigSpec.BooleanValue REVERT_BOW;
+	public static final ModConfigSpec.BooleanValue REVERT_FISHING_ROD;
+	public static final ModConfigSpec.BooleanValue SHIELDS_ONLY_BLOCK_PROJECTILES;
+	public static final ModConfigSpec.BooleanValue DISABLE_SWIMMING;
+	public static final ModConfigSpec.BooleanValue SLOW_WHILE_USING_ITEM;
+	public static final ModConfigSpec.BooleanValue PLAY_CRIT_SOUNDS;
+	public static final ModConfigSpec.BooleanValue PLAY_STRONG_HIT_SOUNDS;
+	public static final ModConfigSpec.BooleanValue PLAY_WEAK_HIT_SOUNDS;
 
-	public static final ForgeConfigSpec.BooleanValue CHANGE_BODY_RENDER;
-	public static final ForgeConfigSpec.BooleanValue REMOVE_BUCKET_ANIMATION;
-	public static final ForgeConfigSpec.BooleanValue REMOVE_DROP_SWING;
+	public static final ModConfigSpec.BooleanValue CHANGE_BODY_RENDER;
+	public static final ModConfigSpec.BooleanValue REMOVE_BUCKET_ANIMATION;
+	public static final ModConfigSpec.BooleanValue REMOVE_DROP_SWING;
 
 	static {
-		ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
+		ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
 		builder.push("combat");
 		REVERT_DAMAGE_LOGIC = builder
 				.comment("Revert the damage calculation logic to 1.8.9")

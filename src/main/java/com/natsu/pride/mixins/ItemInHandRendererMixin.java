@@ -24,7 +24,7 @@ import net.minecraft.world.item.MilkBucketItem;
 import net.minecraft.world.item.SolidBucketItem;
 import net.minecraft.world.item.SwordItem;
 
-@Mixin(ItemInHandRenderer.class)
+@Mixin(value = ItemInHandRenderer.class, remap = false)
 public class ItemInHandRendererMixin {
 
 	@Inject(method = "renderArmWithItem",

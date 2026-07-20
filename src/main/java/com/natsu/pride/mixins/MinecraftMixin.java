@@ -14,7 +14,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.SwordItem;
 
-@Mixin(Minecraft.class)
+@Mixin(value = Minecraft.class, remap = false)
 public class MinecraftMixin {
 
 	// swing visible en bloquant : on consomme les clics d'attaque pour l'anim seule

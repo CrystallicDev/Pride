@@ -17,7 +17,7 @@ import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
 
 // Hit & block : clic droit maintenu avec une épée (offhand vide) pour bloquer
-@Mixin(Item.class)
+@Mixin(value = Item.class, remap = false)
 public class ItemMixin {
 
 	@Inject(method = "use", at = @At("HEAD"), cancellable = true)
