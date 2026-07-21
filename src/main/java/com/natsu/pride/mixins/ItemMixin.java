@@ -9,6 +9,7 @@ import com.natsu.pride.features.PrideFeature;
 
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -34,8 +35,9 @@ public class ItemMixin {
 		cir.setReturnValue(InteractionResultHolder.consume(stack));
 	}
 
+	// 1.21 : getUseDuration prend désormais (ItemStack, LivingEntity).
 	@Inject(method = "getUseDuration", at = @At("HEAD"), cancellable = true)
-	private void getUseDuration(ItemStack stack, CallbackInfoReturnable<Integer> cir) {
+	private void getUseDuration(ItemStack stack, LivingEntity entity, CallbackInfoReturnable<Integer> cir) {
 		if (!PrideFeature.ALLOW_SWORD_BLOCKING.enabled()) return;
 		if (stack.getItem() instanceof SwordItem) {
 			cir.setReturnValue(7200);
