@@ -9,7 +9,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.AxeItem;
@@ -58,19 +58,23 @@ public class CombatHelper {
 		return attackKnockback;
 	}
 
+	// 1.21 : getDamageBonus(item, MobType) supprimé. Le bonus de dégâts d'enchant (sharpness, smite,
+	// bane, impaling) se calcule via modifyDamage, côté serveur uniquement (0 en prédiction client).
+	private static float enchantDamageBonus(Player player, Entity target, float baseDamage) {
+		if (player.level() instanceof ServerLevel serverLevel) {
+			return EnchantmentHelper.modifyDamage(serverLevel, player.getMainHandItem(), target,
+					player.damageSources().playerAttack(player), baseDamage) - baseDamage;
+		}
+		return 0.0F;
+	}
+
 	/**
 	 * Returns the total attack damage of an {@link Player} depending on {@link Pride}'s config
 	 * */
 	public static float getTotalDamage(Player player, Entity target, float baseDamage) {
 		if (PrideFeature.REVERT_DAMAGE_LOGIC.enabled()) {
 			// Calculate the damage based on mappings from 1.8.9.
-			float additionalDamage;
-			if (target instanceof LivingEntity) {
-				additionalDamage = EnchantmentHelper.getDamageBonus(player.getMainHandItem(),
-						((LivingEntity) target).getMobType());
-			} else {
-				additionalDamage = EnchantmentHelper.getDamageBonus(player.getMainHandItem(), MobType.UNDEFINED);
-			}
+			float additionalDamage = enchantDamageBonus(player, target, baseDamage);
 			// Les haches gardent le délai des coups (dégâts réduits si on frappe trop tôt),
 			// même en combat 1.8 — sauf si leur cooldown est explicitement désactivé.
 			if (player.getMainHandItem().getItem() instanceof AxeItem
@@ -92,13 +96,7 @@ public class CombatHelper {
 			// Calculates the damage in the Vanilla way. This will provide weird results if
 			// the attack cooldown is disabled, because damage will stay at maximum, and the
 			// game was not balanced for that
-			float additionalDamage;
-			if (target instanceof LivingEntity) {
-				additionalDamage = EnchantmentHelper.getDamageBonus(player.getMainHandItem(),
-						((LivingEntity) target).getMobType());
-			} else {
-				additionalDamage = EnchantmentHelper.getDamageBonus(player.getMainHandItem(), MobType.UNDEFINED);
-			}
+			float additionalDamage = enchantDamageBonus(player, target, baseDamage);
 
 			float attackStrengthScale = player.getAttackStrengthScale(0.5F);
 			baseDamage *= 0.2F + attackStrengthScale * attackStrengthScale * 0.8F;

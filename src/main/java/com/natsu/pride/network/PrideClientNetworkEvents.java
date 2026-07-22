@@ -4,12 +4,13 @@ import com.natsu.pride.Pride;
 import com.natsu.pride.features.PrideFeature;
 
 import net.neoforged.api.distmarker.Dist;
-import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 
+// bus par défaut = GAME (bus d'événements NeoForge), correct pour ClientPlayerNetworkEvent.
 /** Reset du pilotage à la déconnexion : on ne garde jamais un état PILOTED d'un serveur quitté. */
-@EventBusSubscriber(modid = Pride.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
+@EventBusSubscriber(modid = Pride.MODID, value = Dist.CLIENT)
 public class PrideClientNetworkEvents {
 
 	@SubscribeEvent
