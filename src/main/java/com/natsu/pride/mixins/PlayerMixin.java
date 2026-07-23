@@ -1,6 +1,7 @@
 package com.natsu.pride.mixins;
 
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -14,8 +15,11 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.AxeItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.MaceItem;
 import net.minecraft.world.item.SwordItem;
+import net.minecraft.world.item.TridentItem;
 
 // Stage 1 (port NeoForge) : seules les méthodes CLIENT/blocage. La réécriture complète de
 // `attack` (combat 1.8.9) est différée au Stage 2 (voir port_stage2/, à re-porter depuis la 1.20.1).
@@ -41,13 +45,24 @@ public abstract class PlayerMixin {
 		ci.cancel();
 	}
 
+	/**
+	 * Armes lourdes : hache, masse (1.21) et trident. Elles sont équilibrées AUTOUR du délai de
+	 * coup (dégâts réduits si on frappe trop tôt), contrairement à l'épée qui doit pouvoir spammer
+	 * comme en 1.8.9 — d'où deux options de config distinctes.
+	 */
+	@Unique
+	private static boolean pride$isHeavyWeapon(ItemStack stack) {
+		Item item = stack.getItem();
+		return item instanceof AxeItem || item instanceof MaceItem || item instanceof TridentItem;
+	}
+
 	@Inject(method = "getAttackStrengthScale", at = @At("HEAD"), cancellable = true)
 	public void getAttackStrengthScale(float f, CallbackInfoReturnable<Float> cir) {
 		if (!PrideFeature.active()) return;
 		Player self = (Player) (Object) this;
-		ItemStack item = self.getMainHandItem();
-		if ((PrideFeature.DISABLE_AXE_ATTACK_COOLDOWN.enabled() && item.getItem() instanceof AxeItem) ||
-			(PrideFeature.DISABLE_SWORD_ATTACK_COOLDOWN.enabled() && !(item.getItem() instanceof AxeItem))) {
+		boolean heavy = pride$isHeavyWeapon(self.getMainHandItem());
+		if ((PrideFeature.DISABLE_AXE_ATTACK_COOLDOWN.enabled() && heavy) ||
+			(PrideFeature.DISABLE_SWORD_ATTACK_COOLDOWN.enabled() && !heavy)) {
 			cir.setReturnValue(1.0F);
 		}
 	}
