@@ -161,6 +161,16 @@ publishing {
     }
 }
 
+// Archive chaque build dans CustomMods/builds avec un nom versionné (mc + mod version), pour ne
+// pas écraser les builds des autres versions. Sur NeoForge c'est le jar PRINCIPAL qui est
+// distribuable (pas de jarJar -all comme en Forge : MixinExtras est fourni par le loader).
+tasks.register('archiveBuild', Copy) {
+    from layout.buildDirectory.file("libs/${mod_id}-${mod_version}.jar")
+    into "${projectDir}/../builds"
+    rename { "${mod_id}-${minecraft_version}-${mod_version}.jar" }
+}
+tasks.named('build').configure { finalizedBy 'archiveBuild' }
+
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
 }
