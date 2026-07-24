@@ -7,7 +7,10 @@
 		"PlayerAccessor",
 		"PlayerMixin",
 		"ItemMixin",
-		"LivingEntityMixin"
+		"LivingEntityMixin",
+		"BowItemMixin",
+		"ProjectileMixin",
+		"FishHookMixin"
     ],
     "client": [
 		"MinecraftMixin",
