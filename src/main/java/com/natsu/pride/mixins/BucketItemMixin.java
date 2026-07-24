@@ -1,0 +1,34 @@
+package com.natsu.pride.mixins;
+
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.sugar.Local;
+import com.natsu.pride.config.ServerConfig;
+
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BucketItem;
+
+/**
+ * MLG 1.8.9 : en 1.8.9 le waterlogging n'existe pas, donc vider un seau pose toujours une vraie
+ * source où l'on peut atterrir. En moderne, viser une dalle/un escalier "absorbe" l'eau dans le
+ * bloc et fait rater le clutch.
+ *
+ * <p>Fix : on fait échouer {@code canPlaceLiquid} quand le joueur ne sneak PAS. {@code emptyContents}
+ * retombe alors tout seul sur la face cliquée et y pose une source. En sneakant, le comportement
+ * vanilla est conservé (waterlogging volontaire).
+ */
+@Mixin(BucketItem.class)
+public class BucketItemMixin {
+
+	@ModifyExpressionValue(
+			method = "emptyContents(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/phys/BlockHitResult;Lnet/minecraft/world/item/ItemStack;)Z",
+			at = @At(value = "INVOKE",
+					target = "Lnet/minecraft/world/level/block/LiquidBlockContainer;canPlaceLiquid(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/material/Fluid;)Z"))
+	private boolean pride$noWaterlogUnlessSneaking(boolean original, @Local(argsOnly = true) Player player) {
+		if (!ServerConfig.loaded() || !ServerConfig.WATERLOG_ONLY_WHEN_SNEAKING.get()) return original;
+		if (player != null && player.isShiftKeyDown()) return original;
+		return false;
+	}
+}
