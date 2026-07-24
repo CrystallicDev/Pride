@@ -10,7 +10,8 @@
 		"LivingEntityMixin",
 		"BowItemMixin",
 		"ProjectileMixin",
-		"FishHookMixin"
+		"FishHookMixin",
+		"BucketItemMixin"
     ],
     "client": [
 		"MinecraftMixin",

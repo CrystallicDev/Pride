@@ -19,6 +19,7 @@ public class ServerConfig {
 	public static final ModConfigSpec.BooleanValue SHIELDS_ONLY_BLOCK_PROJECTILES;
 	public static final ModConfigSpec.BooleanValue DISABLE_SWIMMING;
 	public static final ModConfigSpec.BooleanValue SLOW_WHILE_USING_ITEM;
+	public static final ModConfigSpec.BooleanValue WATERLOG_ONLY_WHEN_SNEAKING;
 	public static final ModConfigSpec.BooleanValue PLAY_CRIT_SOUNDS;
 	public static final ModConfigSpec.BooleanValue PLAY_STRONG_HIT_SOUNDS;
 	public static final ModConfigSpec.BooleanValue PLAY_WEAK_HIT_SOUNDS;
@@ -75,6 +76,11 @@ public class ServerConfig {
 				.comment("Cancel sprint while using an item (eating, drinking), like in 1.8.9, so the\n"
 						+ "player can't keep moving at sprint speed while eating.")
 				.define("slowWhileUsingItem", true);
+		WATERLOG_ONLY_WHEN_SNEAKING = builder
+				.comment("Only waterlog a block (slab, stairs...) when the player is sneaking. Without\n"
+						+ "sneaking, the water is placed as a real source on the clicked face, like in\n"
+						+ "1.8.9 where waterlogging did not exist — this is what makes MLG clutches work.")
+				.define("waterlogOnlyWhenSneaking", true);
 		builder.pop();
 
 		builder.push("sounds");
