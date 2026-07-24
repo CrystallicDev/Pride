@@ -32,6 +32,8 @@ public enum PrideFeature {
 	SHIELDS_ONLY_BLOCK_PROJECTILES("shieldsOnlyBlockProjectiles", Side.SERVER, ServerConfig.SHIELDS_ONLY_BLOCK_PROJECTILES),
 	DISABLE_SWIMMING("disableSwimming", Side.CLIENT, ServerConfig.DISABLE_SWIMMING),
 	SLOW_WHILE_USING_ITEM("slowWhileUsingItem", Side.CLIENT, ServerConfig.SLOW_WHILE_USING_ITEM),
+	// Placement de bloc = autoritaire serveur (le plugin s'en charge en mode piloté).
+	WATERLOG_ONLY_WHEN_SNEAKING("waterlogOnlyWhenSneaking", Side.SERVER, ServerConfig.WATERLOG_ONLY_WHEN_SNEAKING),
 	PLAY_CRIT_SOUNDS("playCriticalHitSounds", Side.SERVER, ServerConfig.PLAY_CRIT_SOUNDS),
 	PLAY_STRONG_HIT_SOUNDS("playStrongHitSounds", Side.SERVER, ServerConfig.PLAY_STRONG_HIT_SOUNDS),
 	PLAY_WEAK_HIT_SOUNDS("playWeakHitSounds", Side.SERVER, ServerConfig.PLAY_WEAK_HIT_SOUNDS),

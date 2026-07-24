@@ -11,7 +11,8 @@
 		"ItemMixin",
 		"BowItemMixin",
 		"LivingEntityMixin",
-		"ProjectileMixin"
+		"ProjectileMixin",
+		"BucketItemMixin"
     ],
     "client": [
 		"ItemInHandRendererMixin",
