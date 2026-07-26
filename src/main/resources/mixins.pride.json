@@ -15,7 +15,8 @@
     ],
     "client": [
 		"MinecraftMixin",
-		"LocalPlayerMixin"
+		"LocalPlayerMixin",
+		"ItemInHandRendererMixin"
     ],
     "server": [],
     "injectors": {

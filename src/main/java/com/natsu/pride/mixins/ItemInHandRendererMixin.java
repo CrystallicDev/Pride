@@ -58,7 +58,7 @@ public class ItemInHandRendererMixin {
 
 	@WrapOperation(method = "tick",
 			at = @At(value = "INVOKE",
-					target = "Lnet/minecraftforge/client/ForgeHooksClient;shouldCauseReequipAnimation(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;I)Z",
+					target = "Lnet/neoforged/neoforge/client/ClientHooks;shouldCauseReequipAnimation(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;I)Z",
 					remap = false))
 	private boolean removeBucketReequipAnimation(ItemStack from, ItemStack to, int slot, Operation<Boolean> original) {
 		boolean requip = original.call(from, to, slot);
