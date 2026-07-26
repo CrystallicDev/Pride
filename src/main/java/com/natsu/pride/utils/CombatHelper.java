@@ -32,9 +32,9 @@ public class CombatHelper {
 	/**
 	 * Returns the attack knockback of an {@link Player} depending on {@link Pride}'s config
 	 * */
-	public static float getTotalAttackKnockback(Player player) {
+	public static float getTotalAttackKnockback(Player player, Entity target) {
 		float attackKnockback = (float) player.getAttributeValue(Attributes.ATTACK_KNOCKBACK);
-		attackKnockback += EnchantmentHelper.getKnockbackBonus(player);
+		attackKnockback += enchantKnockbackBonus(player, target);
 
 		if (PrideFeature.REVERT_KNOCKBACK.enabled()) {
 			//1.8.9 knockback method. By default, it only counts the weapon's knockback, the
@@ -68,6 +68,16 @@ public class CombatHelper {
 		return 0.0F;
 	}
 
+	// 1.21 : getKnockbackBonus(player) supprimé. Le bonus de l'enchant Knockback passe par
+	// modifyKnockback (base 0), côté serveur uniquement (0 en prédiction client).
+	private static float enchantKnockbackBonus(Player player, Entity target) {
+		if (player.level() instanceof ServerLevel serverLevel) {
+			return EnchantmentHelper.modifyKnockback(serverLevel, player.getMainHandItem(), target,
+					player.damageSources().playerAttack(player), 0.0F);
+		}
+		return 0.0F;
+	}
+
 	/**
 	 * Returns the total attack damage of an {@link Player} depending on {@link Pride}'s config
 	 * */
@@ -85,11 +95,10 @@ public class CombatHelper {
 			}
 			//Slight change in the Critical Hits detection, to use forge's damage modifier hook
 			boolean isCriticalHit = isCritical(player, target);
-			net.neoforged.neoforge.event.entity.player.CriticalHitEvent hitResult = net.neoforged.neoforge.common.CommonHooks
-					.getCriticalHit(player, target, isCriticalHit, isCriticalHit ? 1.5F : 1.0F);
-			isCriticalHit = hitResult != null;
+			net.neoforged.neoforge.event.entity.player.CriticalHitEvent hitResult = net.neoforged.neoforge.common.CommonHooks.fireCriticalHit(player, target, isCriticalHit, isCriticalHit ? 1.5F : 1.0F);
+				isCriticalHit = hitResult.isCriticalHit();
 			if (isCriticalHit) {
-				baseDamage *= hitResult.getDamageModifier();
+				baseDamage *= hitResult.getDamageMultiplier();
 			}
 			return baseDamage + additionalDamage;
 		} else {
@@ -108,11 +117,10 @@ public class CombatHelper {
 			
 			//Checking Sweep
 			boolean isCriticalHit = isCritical(player, target) && !player.isSprinting();
-			net.neoforged.neoforge.event.entity.player.CriticalHitEvent hitResult = net.neoforged.neoforge.common.CommonHooks
-					.getCriticalHit(player, target, isCriticalHit, isCriticalHit ? 1.5F : 1.0F);
-			isCriticalHit = hitResult != null;
+			net.neoforged.neoforge.event.entity.player.CriticalHitEvent hitResult = net.neoforged.neoforge.common.CommonHooks.fireCriticalHit(player, target, isCriticalHit, isCriticalHit ? 1.5F : 1.0F);
+				isCriticalHit = hitResult.isCriticalHit();
 			if (isCriticalHit) {
-				baseDamage *= hitResult.getDamageModifier();
+				baseDamage *= hitResult.getDamageMultiplier();
 			}
 			
 			additionalDamage += baseDamage;
