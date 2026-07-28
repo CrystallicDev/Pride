@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.natsu.pride.features.PrideFeature;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
@@ -26,11 +27,14 @@ import net.minecraft.world.phys.Vec3;
 @Mixin(value = LivingEntity.class, remap = false)
 public class LivingEntityMixin {
 
-	@Inject(method = "isDamageSourceBlocked", at = @At("HEAD"), cancellable = true)
-	private void onlyBlockProjectiles(DamageSource source, CallbackInfoReturnable<Boolean> cir) {
+	// 26.1 : isDamageSourceBlocked a disparu (blocage porté par le composant BLOCKS_ATTACKS).
+	// applyItemBlocking renvoie les dégâts bloqués : on renvoie 0 pour ne rien bloquer hors projectiles.
+	@Inject(method = "applyItemBlocking", at = @At("HEAD"), cancellable = true)
+	private void onlyBlockProjectiles(ServerLevel level, DamageSource source, float damage,
+			CallbackInfoReturnable<Float> cir) {
 		if (PrideFeature.SHIELDS_ONLY_BLOCK_PROJECTILES.enabled()
 				&& !source.is(net.minecraft.tags.DamageTypeTags.IS_PROJECTILE)) {
-			cir.setReturnValue(false);
+			cir.setReturnValue(0.0F);
 		}
 	}
 
@@ -50,7 +54,7 @@ public class LivingEntityMixin {
 		z = event.getRatioZ();
 		strength *= 1.0D - self.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
 		if (strength > 0.0D) {
-			self.hasImpulse = true;
+			self.needsSync = true;
 			Vec3 current = self.getDeltaMovement();
 			Vec3 push = new Vec3(x, 0.0D, z).normalize().scale(strength);
 			self.setDeltaMovement(
@@ -70,7 +74,7 @@ public class LivingEntityMixin {
 		LivingEntity self = (LivingEntity) (Object) this;
 		if (!(self instanceof Player player)) return;
 		if (player.getAbilities().flying) return;
-		if (!(self.isEffectiveAi() || self.isControlledByLocalInstance())) return;
+		if (!(self.isEffectiveAi() || self.isLocalInstanceAuthoritative())) return;
 		FluidState fluid = self.level().getFluidState(self.blockPosition());
 		if (!self.isInWater() || self.canStandOnFluid(fluid)) return;
 
@@ -110,22 +114,24 @@ public class LivingEntityMixin {
 		return self.level().noCollision(self, box) && !self.level().containsAnyLiquid(box);
 	}
 
+	// 26.1 : tickHeadTurn est passé à void tickHeadTurn(float) — plus de dist en retour (l'anim de
+	// marche arrière est gérée côté appelant, via removeBackwardsBodyFlip). On réplique juste le clamp
+	// corps/tête façon 1.8.9 (±45° + poussée si diff importante) au lieu du ±50° vanilla.
 	@Inject(method = "tickHeadTurn", at = @At("HEAD"), cancellable = true)
-	private void oldSchoolBodyRotation(float targetYaw, float dist, CallbackInfoReturnable<Float> cir) {
+	private void oldSchoolBodyRotation(float yBodyRotT, CallbackInfo ci) {
 		if (!PrideFeature.CHANGE_BODY_RENDER.enabled()) return;
 		LivingEntity self = (LivingEntity) (Object) this;
 		if (!(self instanceof Player)) return;
 
-		float f = Mth.wrapDegrees(targetYaw - self.yBodyRot);
+		float f = Mth.wrapDegrees(yBodyRotT - self.yBodyRot);
 		self.yBodyRot += f * 0.3F;
 		float f1 = Mth.wrapDegrees(self.getYRot() - self.yBodyRot);
-		boolean backwards = f1 < -90.0F || f1 >= 90.0F;
 		f1 = Mth.clamp(f1, -45.0F, 45.0F);
 		self.yBodyRot = self.getYRot() - f1;
 		if (f1 * f1 > 400.0F) {
 			self.yBodyRot += f1 * 0.2F;
 		}
-		cir.setReturnValue(backwards ? -dist : dist);
+		ci.cancel();
 	}
 
 	// retire le retournement du corps en marche arrière (ajouté en 1.9)

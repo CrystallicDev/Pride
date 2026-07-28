@@ -11,8 +11,8 @@ import com.natsu.pride.features.PrideFeature;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.item.SwordItem;
 
 @Mixin(value = Minecraft.class, remap = false)
 public class MinecraftMixin {
@@ -24,7 +24,7 @@ public class MinecraftMixin {
 		Minecraft mc = Minecraft.getInstance();
 		LocalPlayer player = mc.player;
 		if (player == null || !player.isUsingItem()) return;
-		if (!(player.getUseItem().getItem() instanceof SwordItem)) return;
+		if (!player.getUseItem().is(ItemTags.SWORDS)) return;
 		while (mc.options.keyAttack.consumeClick()) {
 			player.swing(InteractionHand.MAIN_HAND);
 		}

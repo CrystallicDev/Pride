@@ -13,28 +13,31 @@ import com.natsu.pride.features.PrideFeature;
 
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.ItemInHandRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.MilkBucketItem;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.SolidBucketItem;
-import net.minecraft.world.item.SwordItem;
 
 @Mixin(value = ItemInHandRenderer.class, remap = false)
 public class ItemInHandRendererMixin {
 
+	// 26.1 : renderItem passe à (LivingEntity, ItemStack, ItemDisplayContext, PoseStack,
+	// SubmitNodeCollector, int) — le boolean leftHand disparaît et MultiBufferSource devient
+	// SubmitNodeCollector (pipeline submit). renderArmWithItem suit le même changement de dernier arg.
 	@Inject(method = "renderArmWithItem",
 			at = @At(value = "INVOKE",
-					target = "Lnet/minecraft/client/renderer/ItemInHandRenderer;renderItem(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemDisplayContext;ZLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V"))
+					target = "Lnet/minecraft/client/renderer/ItemInHandRenderer;renderItem(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemDisplayContext;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;I)V"))
 	private void applyBlockingPose(AbstractClientPlayer player, float partialTicks, float pitch,
 			InteractionHand hand, float swingProgress, ItemStack stack, float equippedProgress,
-			PoseStack poseStack, MultiBufferSource buffer, int combinedLight, CallbackInfo ci) {
+			PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int combinedLight, CallbackInfo ci) {
 		if (!PrideFeature.ALLOW_SWORD_BLOCKING.enabled()) return;
-		if (!(stack.getItem() instanceof SwordItem)) return;
+		if (!stack.is(ItemTags.SWORDS)) return;
 		if (!player.isUsingItem() || player.getUseItemRemainingTicks() <= 0) return;
 		if (player.getUsedItemHand() != hand) return;
 
@@ -71,7 +74,7 @@ public class ItemInHandRendererMixin {
 
 	private static boolean pride$isBucketLike(ItemStack stack) {
 		Item item = stack.getItem();
-		return item instanceof BucketItem || item instanceof MilkBucketItem || item instanceof SolidBucketItem;
+		return item instanceof BucketItem || item == Items.MILK_BUCKET || item instanceof SolidBucketItem;
 	}
 
 }

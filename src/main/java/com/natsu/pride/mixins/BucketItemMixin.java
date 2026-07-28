@@ -7,7 +7,7 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.natsu.pride.features.PrideFeature;
 
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.BucketItem;
 
 /**
@@ -22,14 +22,14 @@ import net.minecraft.world.item.BucketItem;
 @Mixin(value = BucketItem.class, remap = false)
 public class BucketItemMixin {
 
-	// target sans descripteur : matche canPlaceLiquid quelle que soit sa signature (elle varie
-	// selon les versions — le paramètre Player n'a été ajouté qu'en 1.21).
+	// 26.1 : emptyContents perd le paramètre ItemStack et prend un LivingEntity (au lieu de Player).
+	// target canPlaceLiquid sans descripteur : matche quelle que soit sa signature.
 	@ModifyExpressionValue(
-			method = "emptyContents(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/phys/BlockHitResult;Lnet/minecraft/world/item/ItemStack;)Z",
+			method = "emptyContents(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/phys/BlockHitResult;)Z",
 			at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/LiquidBlockContainer;canPlaceLiquid"))
-	private boolean pride$noWaterlogUnlessSneaking(boolean original, @Local(argsOnly = true) Player player) {
+	private boolean pride$noWaterlogUnlessSneaking(boolean original, @Local(argsOnly = true) LivingEntity user) {
 		if (!PrideFeature.WATERLOG_ONLY_WHEN_SNEAKING.enabled()) return original;
-		if (player != null && player.isShiftKeyDown()) return original;
+		if (user != null && user.isShiftKeyDown()) return original;
 		return false;
 	}
 }

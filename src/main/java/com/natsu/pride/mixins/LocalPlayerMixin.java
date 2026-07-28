@@ -34,7 +34,7 @@ public class LocalPlayerMixin {
 	private void keepSprintInWater(LocalPlayer instance, boolean sprinting, Operation<Void> original) {
 		if (!sprinting && PrideFeature.DISABLE_SWIMMING.enabled()
 				&& instance.isInWater() && !instance.isUsingItem()
-				&& instance.input.forwardImpulse > 1.0E-5F
+				&& instance.input.hasForwardImpulse()
 				&& Minecraft.getInstance().options.keySprint.isDown()) {
 			return; // on nage en sprint : ne pas couper
 		}

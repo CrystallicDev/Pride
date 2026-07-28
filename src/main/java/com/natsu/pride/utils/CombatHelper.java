@@ -14,7 +14,6 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 
 public class CombatHelper {
@@ -141,7 +140,8 @@ public class CombatHelper {
 		
 		boolean sprintAndAttackTimerOk = player.isSprinting() && isAttackTimerOk;
 		boolean canAttackSweep = false;
-		double walkDistanceDelta = (double) (player.walkDist - player.walkDistO);
+		// 26.1 : walkDist/walkDistO retirés. getKnownMovement() donne le déplacement horizontal du tick.
+		double walkDistanceDelta = player.getKnownMovement().horizontalDistance();
 		if (isAttackTimerOk && !isCritical(player, target) && !sprintAndAttackTimerOk && player.onGround()
 				&& walkDistanceDelta < (double) player.getSpeed()) {
 			ItemStack itemstack = player.getItemInHand(InteractionHand.MAIN_HAND);

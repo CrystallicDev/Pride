@@ -14,7 +14,7 @@ import com.natsu.pride.features.PrideFeature;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
@@ -75,7 +75,7 @@ public final class PrideNetwork {
 	public record FeaturesPayload(byte version, float blockingReduction, List<String> keys) implements CustomPacketPayload {
 
 		public static final CustomPacketPayload.Type<FeaturesPayload> TYPE =
-				new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(Pride.MODID, "features"));
+				new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(Pride.MODID, "features"));
 
 		public static final StreamCodec<FriendlyByteBuf, FeaturesPayload> STREAM_CODEC = StreamCodec.of(
 				(buf, p) -> {
