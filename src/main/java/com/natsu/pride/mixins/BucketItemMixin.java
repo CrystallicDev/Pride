@@ -22,10 +22,11 @@ import net.minecraft.world.item.BucketItem;
 @Mixin(value = BucketItem.class, remap = false)
 public class BucketItemMixin {
 
-	// 26.1 : emptyContents perd le paramètre ItemStack et prend un LivingEntity (au lieu de Player).
+	// 26.1 : emptyContents prend un LivingEntity (au lieu de Player). NeoForge ajoute une surcharge
+	// à 5 args avec l'ItemStack — c'est ELLE qui contient l'appel canPlaceLiquid (vérifié au bytecode).
 	// target canPlaceLiquid sans descripteur : matche quelle que soit sa signature.
 	@ModifyExpressionValue(
-			method = "emptyContents(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/phys/BlockHitResult;)Z",
+			method = "emptyContents(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/phys/BlockHitResult;Lnet/minecraft/world/item/ItemStack;)Z",
 			at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/LiquidBlockContainer;canPlaceLiquid"))
 	private boolean pride$noWaterlogUnlessSneaking(boolean original, @Local(argsOnly = true) LivingEntity user) {
 		if (!PrideFeature.WATERLOG_ONLY_WHEN_SNEAKING.enabled()) return original;
