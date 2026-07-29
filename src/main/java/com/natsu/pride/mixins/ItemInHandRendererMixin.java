@@ -2,22 +2,12 @@ package com.natsu.pride.mixins;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
 import com.natsu.pride.features.PrideFeature;
 
-import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.ItemInHandRenderer;
-import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.tags.ItemTags;
-import net.minecraft.util.Mth;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -27,37 +17,9 @@ import net.minecraft.world.item.SolidBucketItem;
 @Mixin(value = ItemInHandRenderer.class, remap = false)
 public class ItemInHandRendererMixin {
 
-	// 26.1 : renderItem passe à (LivingEntity, ItemStack, ItemDisplayContext, PoseStack,
-	// SubmitNodeCollector, int) — le boolean leftHand disparaît et MultiBufferSource devient
-	// SubmitNodeCollector (pipeline submit). renderArmWithItem suit le même changement de dernier arg.
-	@Inject(method = "renderArmWithItem",
-			at = @At(value = "INVOKE",
-					target = "Lnet/minecraft/client/renderer/ItemInHandRenderer;renderItem(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemDisplayContext;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;I)V"))
-	private void applyBlockingPose(AbstractClientPlayer player, float partialTicks, float pitch,
-			InteractionHand hand, float swingProgress, ItemStack stack, float equippedProgress,
-			PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int combinedLight, CallbackInfo ci) {
-		if (!PrideFeature.ALLOW_SWORD_BLOCKING.enabled()) return;
-		if (!stack.is(ItemTags.SWORDS)) return;
-		if (!player.isUsingItem() || player.getUseItemRemainingTicks() <= 0) return;
-		if (player.getUsedItemHand() != hand) return;
-
-		boolean mainHand = hand == InteractionHand.MAIN_HAND;
-		HumanoidArm arm = mainHand ? player.getMainArm() : player.getMainArm().getOpposite();
-		float side = arm == HumanoidArm.RIGHT ? 1.0F : -1.0F;
-
-		if (swingProgress > 0.0F) {
-			float f = Mth.sin(swingProgress * swingProgress * (float) Math.PI);
-			float f1 = Mth.sin(Mth.sqrt(swingProgress) * (float) Math.PI);
-			poseStack.mulPose(Axis.YP.rotationDegrees(side * f * -20.0F));
-			poseStack.mulPose(Axis.ZP.rotationDegrees(side * f1 * -20.0F));
-			poseStack.mulPose(Axis.XP.rotationDegrees(f1 * -80.0F));
-		}
-
-		poseStack.translate(side * -0.14142136F, 0.08F, 0.14142136F);
-		poseStack.mulPose(Axis.XP.rotationDegrees(-102.25F));
-		poseStack.mulPose(Axis.YP.rotationDegrees(side * 13.365F));
-		poseStack.mulPose(Axis.ZP.rotationDegrees(side * 78.05F));
-	}
+	// La pose de blocage épée n'est plus gérée ici : en 26.1 renderArmWithItem applique nativement la
+	// pose "block" pour toute anim d'usage BLOCK (hors bouclier), donc l'épée (à qui ItemMixin fait
+	// renvoyer ItemUseAnimation.BLOCK) est déjà posée correctement. Un transform en plus la doublait.
 
 	@WrapOperation(method = "tick",
 			at = @At(value = "INVOKE",

@@ -25,11 +25,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.AxeItem;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.MaceItem;
-import net.minecraft.world.item.TridentItem;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.phys.Vec3;
 
@@ -51,24 +47,30 @@ public abstract class PlayerMixin {
 		ci.cancel();
 	}
 
-	/**
-	 * Armes lourdes : hache, masse (1.21) et trident. Elles sont équilibrées AUTOUR du délai de
-	 * coup (dégâts réduits si on frappe trop tôt), contrairement à l'épée qui doit pouvoir spammer
-	 * comme en 1.8.9 — d'où deux options de config distinctes.
-	 */
+	// Le cooldown est désactivé pour l'arme tenue selon son type (lourde = axe config, sinon sword config).
 	@Unique
-	private static boolean pride$isHeavyWeapon(ItemStack stack) {
-		Item item = stack.getItem();
-		return item instanceof AxeItem || item instanceof MaceItem || item instanceof TridentItem;
+	private static boolean pride$cooldownDisabled(ItemStack stack) {
+		boolean heavy = CombatHelper.isHeavyWeapon(stack);
+		return (PrideFeature.DISABLE_AXE_ATTACK_COOLDOWN.enabled() && heavy)
+				|| (PrideFeature.DISABLE_SWORD_ATTACK_COOLDOWN.enabled() && !heavy);
 	}
 
+	// Cooldown gameplay (dégâts/knockback selon la charge d'attaque).
 	@Inject(method = "getAttackStrengthScale", at = @At("HEAD"), cancellable = true)
 	public void getAttackStrengthScale(float f, CallbackInfoReturnable<Float> cir) {
 		if (!PrideFeature.active()) return;
-		Player self = (Player) (Object) this;
-		boolean heavy = pride$isHeavyWeapon(self.getMainHandItem());
-		if ((PrideFeature.DISABLE_AXE_ATTACK_COOLDOWN.enabled() && heavy) ||
-			(PrideFeature.DISABLE_SWORD_ATTACK_COOLDOWN.enabled() && !heavy)) {
+		if (pride$cooldownDisabled(((Player) (Object) this).getMainHandItem())) {
+			cir.setReturnValue(1.0F);
+		}
+	}
+
+	// 26.1 : le dip visuel de l'arme (descente dans la main) est passé sur un ticker séparé, lu via
+	// getItemSwapScale (plus getAttackStrengthScale). On l'annule aussi, sinon l'arme redescend malgré
+	// le cooldown gameplay désactivé.
+	@Inject(method = "getItemSwapScale", at = @At("HEAD"), cancellable = true)
+	public void getItemSwapScale(float f, CallbackInfoReturnable<Float> cir) {
+		if (!PrideFeature.active()) return;
+		if (pride$cooldownDisabled(((Player) (Object) this).getMainHandItem())) {
 			cir.setReturnValue(1.0F);
 		}
 	}

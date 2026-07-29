@@ -4,6 +4,7 @@ import com.natsu.pride.Pride;
 import com.natsu.pride.features.PrideFeature;
 
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffects;
@@ -12,13 +13,25 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.MaceItem;
+import net.minecraft.world.item.TridentItem;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 
 public class CombatHelper {
 
-	
+	/**
+	 * Armes lourdes (hache, masse, trident, lance) : elles sont équilibrées AUTOUR du délai de coup
+	 * (dégâts réduits si on frappe trop tôt), contrairement à l'épée qui doit pouvoir spammer comme en
+	 * 1.8.9 — d'où deux options de config distinctes. Détection par tag (hache/lance sont data-driven
+	 * en 26.1, plus de classe) + classe pour masse/trident qui n'ont pas de tag dédié.
+	 */
+	public static boolean isHeavyWeapon(ItemStack stack) {
+		return stack.is(ItemTags.AXES) || stack.is(ItemTags.SPEARS)
+				|| stack.getItem() instanceof MaceItem || stack.getItem() instanceof TridentItem;
+	}
+
+
 	/**
 	 * Returns the base damage of an {@link Player} depending on {@link Pride}'s config
 	 * */
@@ -84,9 +97,9 @@ public class CombatHelper {
 		if (PrideFeature.REVERT_DAMAGE_LOGIC.enabled()) {
 			// Calculate the damage based on mappings from 1.8.9.
 			float additionalDamage = enchantDamageBonus(player, target, baseDamage);
-			// Les haches gardent le délai des coups (dégâts réduits si on frappe trop tôt),
+			// Les armes lourdes gardent le délai des coups (dégâts réduits si on frappe trop tôt),
 			// même en combat 1.8 — sauf si leur cooldown est explicitement désactivé.
-			if (player.getMainHandItem().getItem() instanceof AxeItem
+			if (isHeavyWeapon(player.getMainHandItem())
 					&& !PrideFeature.DISABLE_AXE_ATTACK_COOLDOWN.enabled()) {
 				float attackStrengthScale = player.getAttackStrengthScale(0.5F);
 				baseDamage *= 0.2F + attackStrengthScale * attackStrengthScale * 0.8F;
