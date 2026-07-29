@@ -31,6 +31,16 @@ public class CombatHelper {
 				|| stack.getItem() instanceof MaceItem || stack.getItem() instanceof TridentItem;
 	}
 
+	/** Le cooldown d'attaque est-il désactivé pour l'arme tenue ? Un toggle de config par type d'arme. */
+	public static boolean attackCooldownDisabledFor(ItemStack stack) {
+		if (stack.is(ItemTags.AXES)) return PrideFeature.DISABLE_AXE_ATTACK_COOLDOWN.enabled();
+		if (stack.is(ItemTags.SPEARS)) return PrideFeature.DISABLE_SPEAR_ATTACK_COOLDOWN.enabled();
+		if (stack.getItem() instanceof MaceItem) return PrideFeature.DISABLE_MACE_ATTACK_COOLDOWN.enabled();
+		if (stack.getItem() instanceof TridentItem) return PrideFeature.DISABLE_TRIDENT_ATTACK_COOLDOWN.enabled();
+		// épée + tout le reste (léger)
+		return PrideFeature.DISABLE_SWORD_ATTACK_COOLDOWN.enabled();
+	}
+
 
 	/**
 	 * Returns the base damage of an {@link Player} depending on {@link Pride}'s config
@@ -98,9 +108,9 @@ public class CombatHelper {
 			// Calculate the damage based on mappings from 1.8.9.
 			float additionalDamage = enchantDamageBonus(player, target, baseDamage);
 			// Les armes lourdes gardent le délai des coups (dégâts réduits si on frappe trop tôt),
-			// même en combat 1.8 — sauf si leur cooldown est explicitement désactivé.
+			// même en combat 1.8 — sauf si le cooldown de CETTE arme est explicitement désactivé.
 			if (isHeavyWeapon(player.getMainHandItem())
-					&& !PrideFeature.DISABLE_AXE_ATTACK_COOLDOWN.enabled()) {
+					&& !attackCooldownDisabledFor(player.getMainHandItem())) {
 				float attackStrengthScale = player.getAttackStrengthScale(0.5F);
 				baseDamage *= 0.2F + attackStrengthScale * attackStrengthScale * 0.8F;
 				additionalDamage *= attackStrengthScale;

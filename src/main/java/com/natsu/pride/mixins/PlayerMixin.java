@@ -1,7 +1,6 @@
 package com.natsu.pride.mixins;
 
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -47,19 +46,11 @@ public abstract class PlayerMixin {
 		ci.cancel();
 	}
 
-	// Le cooldown est désactivé pour l'arme tenue selon son type (lourde = axe config, sinon sword config).
-	@Unique
-	private static boolean pride$cooldownDisabled(ItemStack stack) {
-		boolean heavy = CombatHelper.isHeavyWeapon(stack);
-		return (PrideFeature.DISABLE_AXE_ATTACK_COOLDOWN.enabled() && heavy)
-				|| (PrideFeature.DISABLE_SWORD_ATTACK_COOLDOWN.enabled() && !heavy);
-	}
-
-	// Cooldown gameplay (dégâts/knockback selon la charge d'attaque).
+	// Cooldown gameplay (dégâts/knockback selon la charge d'attaque). Toggle par type d'arme.
 	@Inject(method = "getAttackStrengthScale", at = @At("HEAD"), cancellable = true)
 	public void getAttackStrengthScale(float f, CallbackInfoReturnable<Float> cir) {
 		if (!PrideFeature.active()) return;
-		if (pride$cooldownDisabled(((Player) (Object) this).getMainHandItem())) {
+		if (CombatHelper.attackCooldownDisabledFor(((Player) (Object) this).getMainHandItem())) {
 			cir.setReturnValue(1.0F);
 		}
 	}
@@ -70,7 +61,7 @@ public abstract class PlayerMixin {
 	@Inject(method = "getItemSwapScale", at = @At("HEAD"), cancellable = true)
 	public void getItemSwapScale(float f, CallbackInfoReturnable<Float> cir) {
 		if (!PrideFeature.active()) return;
-		if (pride$cooldownDisabled(((Player) (Object) this).getMainHandItem())) {
+		if (CombatHelper.attackCooldownDisabledFor(((Player) (Object) this).getMainHandItem())) {
 			cir.setReturnValue(1.0F);
 		}
 	}
