@@ -30,7 +30,6 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ContainerLevelAccess;
-import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.alchemy.Potion;
@@ -60,13 +59,11 @@ public abstract class PlayerMixin {
 		ci.cancel();
 	}
 
+	// Cooldown gameplay (dégâts/knockback selon la charge d'attaque). Toggle par type d'arme.
 	@Inject(method = "getAttackStrengthScale", at = @At("HEAD"), cancellable = true)
 	public void getAttackStrengthScale(float f, CallbackInfoReturnable<Float> cir) {
 	    if (!PrideFeature.active()) return;
-	    Player self = (Player) (Object) this;
-	    ItemStack item = self.getMainHandItem();
-	    if ((PrideFeature.DISABLE_AXE_ATTACK_COOLDOWN.enabled() && item.getItem() instanceof AxeItem) ||
-	        (PrideFeature.DISABLE_SWORD_ATTACK_COOLDOWN.enabled() && !(item.getItem() instanceof AxeItem))) {
+	    if (CombatHelper.attackCooldownDisabledFor(((Player) (Object) this).getMainHandItem())) {
 	        cir.setReturnValue(1.0F);
 	    }
 	}
