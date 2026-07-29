@@ -13,13 +13,32 @@ import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.AxeItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SwordItem;
+import net.minecraft.world.item.TridentItem;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 
 public class CombatHelper {
 
-	
+	/**
+	 * Armes lourdes (hache, trident) : équilibrées AUTOUR du délai de coup (dégâts réduits si on frappe
+	 * trop tôt), contrairement à l'épée qui doit pouvoir spammer comme en 1.8.9.
+	 */
+	public static boolean isHeavyWeapon(ItemStack stack) {
+		Item item = stack.getItem();
+		return item instanceof AxeItem || item instanceof TridentItem;
+	}
+
+	/** Le cooldown d'attaque est-il désactivé pour l'arme tenue ? Un toggle de config par type d'arme. */
+	public static boolean attackCooldownDisabledFor(ItemStack stack) {
+		Item item = stack.getItem();
+		if (item instanceof AxeItem) return PrideFeature.DISABLE_AXE_ATTACK_COOLDOWN.enabled();
+		if (item instanceof TridentItem) return PrideFeature.DISABLE_TRIDENT_ATTACK_COOLDOWN.enabled();
+		// épée + tout le reste (léger)
+		return PrideFeature.DISABLE_SWORD_ATTACK_COOLDOWN.enabled();
+	}
+
 	/**
 	 * Returns the base damage of an {@link Player} depending on {@link Pride}'s config
 	 * */
@@ -28,7 +47,7 @@ public class CombatHelper {
 		// donc déjà pris en compte ici et affiché dans le tooltip.
 		return (float) player.getAttributeValue(Attributes.ATTACK_DAMAGE);
 	}
-	
+
 	/**
 	 * Returns the attack knockback of an {@link Player} depending on {@link Pride}'s config
 	 * */
@@ -71,10 +90,10 @@ public class CombatHelper {
 			} else {
 				additionalDamage = EnchantmentHelper.getDamageBonus(player.getMainHandItem(), MobType.UNDEFINED);
 			}
-			// Les haches gardent le délai des coups (dégâts réduits si on frappe trop tôt),
-			// même en combat 1.8 — sauf si leur cooldown est explicitement désactivé.
-			if (player.getMainHandItem().getItem() instanceof AxeItem
-					&& !PrideFeature.DISABLE_AXE_ATTACK_COOLDOWN.enabled()) {
+			// Les armes lourdes gardent le délai des coups (dégâts réduits si on frappe trop tôt),
+			// même en combat 1.8 — sauf si le cooldown de CETTE arme est explicitement désactivé.
+			if (isHeavyWeapon(player.getMainHandItem())
+					&& !attackCooldownDisabledFor(player.getMainHandItem())) {
 				float attackStrengthScale = player.getAttackStrengthScale(0.5F);
 				baseDamage *= 0.2F + attackStrengthScale * attackStrengthScale * 0.8F;
 				additionalDamage *= attackStrengthScale;
