@@ -13,6 +13,8 @@ public class ServerConfig {
 	public static final ModConfigSpec.BooleanValue DISABLE_SWORD_ATTACK_COOLDOWN;
 	public static final ModConfigSpec.BooleanValue DISABLE_SWEEPING_ATTACKS;
 	public static final ModConfigSpec.BooleanValue DISABLE_AXE_ATTACK_COOLDOWN;
+	public static final ModConfigSpec.BooleanValue DISABLE_MACE_ATTACK_COOLDOWN;
+	public static final ModConfigSpec.BooleanValue DISABLE_TRIDENT_ATTACK_COOLDOWN;
 	public static final ModConfigSpec.BooleanValue REMOVE_ARROW_DISPERSION;
 	public static final ModConfigSpec.BooleanValue REVERT_BOW;
 	public static final ModConfigSpec.BooleanValue REVERT_FISHING_ROD;
@@ -45,7 +47,7 @@ public class ServerConfig {
 				.comment("The damage reduction (in percentage) applied when blocking damage with a sword.")
 				.defineInRange("blockingDamageReduction", 0.5d, 0.0d, 1.0d);
 		DISABLE_SWORD_ATTACK_COOLDOWN = builder
-				.comment("Disable the attack cooldown for every item except axes.")
+				.comment("Disable the attack cooldown for swords, and any item without its own toggle below.")
 				.define("disableSwordCooldown", true);
 		DISABLE_SWEEPING_ATTACKS = builder
 				.comment("Disable the sweeping attacks, their particles and sounds. This also\n"
@@ -54,7 +56,13 @@ public class ServerConfig {
 		DISABLE_AXE_ATTACK_COOLDOWN = builder
 				.comment("Disable the attack cooldown for axes. To keep them balanced, any axe's\n"
 						+ "base damage is reduced by 2 when this is enabled.")
-				.define("disableAxesCooldown", true);
+				.define("disableAxeCooldown", true);
+		DISABLE_MACE_ATTACK_COOLDOWN = builder
+				.comment("Disable the attack cooldown for maces.")
+				.define("disableMaceCooldown", true);
+		DISABLE_TRIDENT_ATTACK_COOLDOWN = builder
+				.comment("Disable the attack cooldown for tridents.")
+				.define("disableTridentCooldown", true);
 		REMOVE_ARROW_DISPERSION = builder
 				.comment("Remove the arrow dispersion (inaccuracy) of bows, like in 1.8.9.")
 				.define("removeArrowDispersion", true);
