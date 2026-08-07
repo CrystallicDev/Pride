@@ -22,7 +22,9 @@ import net.minecraftforge.fml.common.Mod;
  * composant {@link ItemAttributeModifiers}). On patche {@link DataComponents#ATTRIBUTE_MODIFIERS} à
  * l'enregistrement de l'item via {@link GatherComponentsEvent.Item} (bus MOD).
  */
-@Mod.EventBusSubscriber(modid = Pride.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
+// GatherComponentsEvent est diffusé sur le bus FORGE (jeu), pas MOD ; il est posté "lazily"
+// au premier accès aux composants d'un item (après le chargement), donc les items vanilla sont bien vus.
+@Mod.EventBusSubscriber(modid = Pride.MODID)
 public class AxeAttributeHandler {
 
 	// UUID vanilla du modificateur "dégâts de base" d'une arme (Item.BASE_ATTACK_DAMAGE_UUID, protected).
