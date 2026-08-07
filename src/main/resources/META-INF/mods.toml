@@ -4,6 +4,9 @@ license="MIT"
 # Optional: replace with a real link later
 # issueTrackerURL="https://github.com/yourname/yourmod/issues"
 
+# Autorise la connexion aux serveurs/clients sans Pride (mod optionnel côté client).
+displayTest="IGNORE_ALL_VERSION"
+
 [[mods]]
 modId="pride"
 version="1.4.0"

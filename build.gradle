@@ -2,7 +2,7 @@ plugins {
     id 'eclipse'
     id 'idea'
     id 'maven-publish'
-    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+    id 'net.minecraftforge.gradle' version '[6.0.24,6.2)'
 }
 
 version = mod_version
@@ -12,12 +12,14 @@ base {
     archivesName = mod_id
 }
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
 
 minecraft {
     mappings channel: 'official', version: minecraft_version
+    // 1.20.6 : Forge utilise les mappings Mojang au runtime → pas de réobfuscation (ni de refmap mixin).
+    reobf = false
     copyIdeResources = true
 
     runs {
@@ -69,33 +71,6 @@ dependencies {
     }
 }
 
-def refmapName = "mixins.pride.refmap.json"
-def refmapFile = file("${buildDir}/tmp/compileJava/${refmapName}")
-
-afterEvaluate {
-    def tsrgFile = tasks.named('reobfJar').get().mappings.get().asFile
-    compileJava {
-        options.compilerArgs += [
-            "-AreobfTsrgFile=${tsrgFile.absolutePath}",
-            "-AoutRefMapFile=${refmapFile.absolutePath}",
-            "-AmappingTypes=tsrg"
-        ]
-    }
-}
-
-compileJava.doLast {
-    if (refmapFile.exists()) {
-        copy {
-            from refmapFile
-            into sourceSets.main.output.resourcesDir
-            rename { refmapName }
-        }
-    } else {
-        println "WARNING: refmap file was not generated at ${refmapFile.absolutePath}"
-    }
-}
-// ---------------------------------
-
 tasks.named('processResources', ProcessResources).configure {
 	dependsOn compileJava
     var replaceProperties = [
@@ -119,11 +94,7 @@ tasks.named('processResources', ProcessResources).configure {
 }
 
 tasks.named('jar', Jar).configure {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE  // add this line
-
-    from(refmapFile) {
-        rename { refmapName }
-    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     manifest {
         attributes([
@@ -137,25 +108,19 @@ tasks.named('jar', Jar).configure {
                 'MixinConfigs'            : 'mixins.pride.json',
         ])
     }
-
-    finalizedBy 'reobfJar'
 }
 
-// Le refmap doit aussi être présent dans le jar jarJar (-all), c'est lui qui est distribué
-tasks.named('jarJar').configure {
-    from(refmapFile) {
-        rename { refmapName }
-    }
-}
-
-// Archive chaque build (le jar distribuable -all) dans CustomMods/builds avec un nom
-// versionné (mc + mod version) pour ne pas écraser les builds des autres versions.
+// Archive chaque build (le jar distribuable -all, MixinExtras embarqué) dans CustomMods/builds
+// avec un nom versionné (mc + loader + mod version) pour ne pas écraser les autres versions.
 tasks.register('archiveBuild', Copy) {
+    dependsOn 'jarJar'
+    mustRunAfter 'jarJar'
     from "${buildDir}/libs/${mod_id}-${mod_version}-all.jar"
     into "${projectDir}/../builds"
-    rename { "${mod_id}-${minecraft_version}-${mod_version}.jar" }
+    rename { "${mod_id}-${minecraft_version}-${mod_loader}-${mod_version}.jar" }
 }
-tasks.named('build').configure { finalizedBy 'archiveBuild' }
+// jarJar produit le jar distribuable (-all) : il doit tourner à chaque build.
+tasks.named('build').configure { dependsOn 'jarJar'; finalizedBy 'archiveBuild' }
 
 publishing {
     publications {

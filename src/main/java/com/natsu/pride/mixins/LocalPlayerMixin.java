@@ -12,7 +12,7 @@ import com.natsu.pride.features.PrideFeature;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 
-@Mixin(LocalPlayer.class)
+@Mixin(value = LocalPlayer.class, remap = false)
 public class LocalPlayerMixin {
 
 	// 1.8.9 : utiliser un item (manger, boire) coupe le sprint. La 1.9+ le laisse actif,

@@ -9,7 +9,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.AxeItem;
@@ -83,13 +83,9 @@ public class CombatHelper {
 	public static float getTotalDamage(Player player, Entity target, float baseDamage) {
 		if (PrideFeature.REVERT_DAMAGE_LOGIC.enabled()) {
 			// Calculate the damage based on mappings from 1.8.9.
-			float additionalDamage;
-			if (target instanceof LivingEntity) {
-				additionalDamage = EnchantmentHelper.getDamageBonus(player.getMainHandItem(),
-						((LivingEntity) target).getMobType());
-			} else {
-				additionalDamage = EnchantmentHelper.getDamageBonus(player.getMainHandItem(), MobType.UNDEFINED);
-			}
+			// 1.20.6 : MobType supprimé, getDamageBonus prend l'EntityType de la cible (null si non-vivant).
+			EntityType<?> targetType = target instanceof LivingEntity ? target.getType() : null;
+			float additionalDamage = EnchantmentHelper.getDamageBonus(player.getMainHandItem(), targetType);
 			// Les armes lourdes gardent le délai des coups (dégâts réduits si on frappe trop tôt),
 			// même en combat 1.8 — sauf si le cooldown de CETTE arme est explicitement désactivé.
 			if (isHeavyWeapon(player.getMainHandItem())
@@ -111,13 +107,9 @@ public class CombatHelper {
 			// Calculates the damage in the Vanilla way. This will provide weird results if
 			// the attack cooldown is disabled, because damage will stay at maximum, and the
 			// game was not balanced for that
-			float additionalDamage;
-			if (target instanceof LivingEntity) {
-				additionalDamage = EnchantmentHelper.getDamageBonus(player.getMainHandItem(),
-						((LivingEntity) target).getMobType());
-			} else {
-				additionalDamage = EnchantmentHelper.getDamageBonus(player.getMainHandItem(), MobType.UNDEFINED);
-			}
+			// 1.20.6 : MobType supprimé, getDamageBonus prend l'EntityType de la cible (null si non-vivant).
+			EntityType<?> targetType = target instanceof LivingEntity ? target.getType() : null;
+			float additionalDamage = EnchantmentHelper.getDamageBonus(player.getMainHandItem(), targetType);
 
 			float attackStrengthScale = player.getAttackStrengthScale(0.5F);
 			baseDamage *= 0.2F + attackStrengthScale * attackStrengthScale * 0.8F;

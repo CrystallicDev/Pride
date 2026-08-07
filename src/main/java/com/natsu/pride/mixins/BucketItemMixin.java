@@ -19,7 +19,7 @@ import net.minecraft.world.item.BucketItem;
  * retombe alors tout seul sur la face cliquée et y pose une source. En sneakant, le comportement
  * vanilla est conservé (waterlogging volontaire).
  */
-@Mixin(BucketItem.class)
+@Mixin(value = BucketItem.class, remap = false)
 public class BucketItemMixin {
 
 	@ModifyExpressionValue(

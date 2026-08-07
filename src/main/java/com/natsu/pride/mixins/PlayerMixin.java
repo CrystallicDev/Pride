@@ -25,7 +25,6 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
@@ -37,7 +36,7 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-@Mixin(Player.class)
+@Mixin(value = Player.class, remap = false)
 public abstract class PlayerMixin {
 
 	private boolean isReducingParryDamage = false;
@@ -130,7 +129,7 @@ public abstract class PlayerMixin {
 						targetHealth = ((LivingEntity) targetEntity).getHealth();
 						if (hasFireAspect > 0 && !targetEntity.isOnFire()) {
 							shouldSetOnFire = true;
-							targetEntity.setSecondsOnFire(1);
+							targetEntity.igniteForSeconds(1);
 						}
 					}
 					
@@ -153,7 +152,7 @@ public abstract class PlayerMixin {
 								if (livingentity != self && livingentity != targetEntity && !self.isAlliedTo(livingentity)
 										&& (!(livingentity instanceof ArmorStand)
 												|| !((ArmorStand) livingentity).isMarker())
-										&& self.canReach(livingentity, 0)) { // Original check was dist < 3, range is 3,
+										&& self.distanceToSqr(livingentity) < 9.0D) {
 																			// so vanilla used padding=0
 									livingentity.knockback((double) 0.4F,
 											(double) Mth.sin(self.getYRot() * ((float) Math.PI / 180F)),
@@ -213,7 +212,7 @@ public abstract class PlayerMixin {
 							float damageDealt = targetHealth - ((LivingEntity) targetEntity).getHealth();
 							self.awardStat(Stats.DAMAGE_DEALT, Math.round(damageDealt * 10.0F));
 							if (hasFireAspect > 0) {
-								targetEntity.setSecondsOnFire(hasFireAspect * 4);
+								targetEntity.igniteForSeconds(hasFireAspect * 4);
 							}
 
 							// particules de dégâts (coeurs) : elles n'existent pas en 1.8
@@ -251,9 +250,9 @@ public abstract class PlayerMixin {
 				float additionalDamage;
 				if (target instanceof LivingEntity) {
 					additionalDamage = EnchantmentHelper.getDamageBonus(self.getMainHandItem(),
-							((LivingEntity) target).getMobType());
+							target.getType());
 				} else {
-					additionalDamage = EnchantmentHelper.getDamageBonus(self.getMainHandItem(), MobType.UNDEFINED);
+					additionalDamage = EnchantmentHelper.getDamageBonus(self.getMainHandItem(), (net.minecraft.world.entity.EntityType<?>) null);
 				}
 
 				float attackStrengthScale = self.getAttackStrengthScale(0.5F);
@@ -333,7 +332,7 @@ public abstract class PlayerMixin {
 								if (livingentity != self && livingentity != target && !self.isAlliedTo(livingentity)
 										&& (!(livingentity instanceof ArmorStand)
 												|| !((ArmorStand) livingentity).isMarker())
-										&& self.canReach(livingentity, 0)) { // Original check was dist < 3, range is 3,
+										&& self.distanceToSqr(livingentity) < 9.0D) {
 																			// so vanilla used padding=0
 									livingentity.knockback((double) 0.4F,
 											(double) Mth.sin(self.getYRot() * ((float) Math.PI / 180F)),

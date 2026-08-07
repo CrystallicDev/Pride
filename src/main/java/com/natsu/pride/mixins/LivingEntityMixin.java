@@ -21,10 +21,10 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
 
-@Mixin(LivingEntity.class)
+@Mixin(value = LivingEntity.class, remap = false)
 public class LivingEntityMixin {
 
 	@Inject(method = "isDamageSourceBlocked", at = @At("HEAD"), cancellable = true)
@@ -41,7 +41,7 @@ public class LivingEntityMixin {
 	private void oldSchoolKnockback(double strength, double x, double z, CallbackInfo ci) {
 		if (!PrideFeature.REVERT_KNOCKBACK.enabled()) return;
 		LivingEntity self = (LivingEntity) (Object) this;
-		LivingKnockBackEvent event = ForgeHooks.onLivingKnockBack(self, (float) strength, x, z);
+		LivingKnockBackEvent event = ForgeEventFactory.onLivingKnockBack(self, (float) strength, x, z);
 		if (event.isCanceled()) {
 			ci.cancel();
 			return;

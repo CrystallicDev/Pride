@@ -11,15 +11,15 @@ import com.natsu.pride.features.PrideFeature;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.event.EventNetworkChannel;
+import net.minecraftforge.event.network.CustomPayloadEvent;
+import net.minecraftforge.network.ChannelBuilder;
+import net.minecraftforge.network.EventNetworkChannel;
 
 /**
  * Canal de pilotage par le serveur (plugin Paper / proxy). Le mod ECOUTE seulement : un serveur
  * envoie sur {@code pride:features} la liste des features à activer côté client, ce qui bascule
- * {@link PrideFeature} en mode PILOTED. Canal OPTIONNEL (acceptMissingOr) : la connexion à un
- * serveur sans ce canal (vanilla, Paper nu, Forge sans Pride) reste possible, features à off.
+ * {@link PrideFeature} en mode PILOTED. Canal OPTIONNEL : la connexion à un serveur sans ce canal
+ * (vanilla, Paper nu, Forge sans Pride) reste possible, features à off.
  *
  * <p>Format du payload (clientbound), versionné pour rester compatible avec des plugins tiers :
  * <pre>
@@ -35,7 +35,7 @@ public final class PrideNetwork {
 	private static final Logger LOGGER = LogUtils.getLogger();
 
 	public static final ResourceLocation CHANNEL_ID = new ResourceLocation(Pride.MODID, "features");
-	private static final String PROTOCOL_VERSION = "1";
+	private static final int PROTOCOL_VERSION = 1;
 	private static final byte PAYLOAD_VERSION = 1;
 
 	private static EventNetworkChannel channel;
@@ -43,16 +43,17 @@ public final class PrideNetwork {
 	private PrideNetwork() {}
 
 	public static void register() {
-		channel = NetworkRegistry.newEventChannel(
-				CHANNEL_ID,
-				() -> PROTOCOL_VERSION,
-				NetworkRegistry.acceptMissingOr(PROTOCOL_VERSION),
-				NetworkRegistry.acceptMissingOr(PROTOCOL_VERSION));
+		// 1.20.6 : NetworkRegistry supprimé → ChannelBuilder. optional() = canal accepté même absent
+		// des deux côtés (le mod n'exige pas que le serveur le connaisse).
+		channel = ChannelBuilder.named(CHANNEL_ID)
+				.optional()
+				.networkProtocolVersion(PROTOCOL_VERSION)
+				.eventNetworkChannel();
 		channel.addListener(PrideNetwork::onPayload);
 	}
 
-	private static void onPayload(NetworkEvent event) {
-		NetworkEvent.Context ctx = event.getSource().get();
+	private static void onPayload(CustomPayloadEvent event) {
+		CustomPayloadEvent.Context ctx = event.getSource();
 		ctx.setPacketHandled(true);
 		// getSender() != null => reçu côté serveur (venant d'un client) : on n'écoute que côté client.
 		if (ctx.getSender() != null) return;
