@@ -8,6 +8,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -79,24 +80,16 @@ public class CombatHelper {
 		return attackKnockback;
 	}
 
-	// 1.21 : getDamageBonus(item, MobType) supprimé. Le bonus de dégâts d'enchant (sharpness, smite,
-	// bane, impaling) se calcule via modifyDamage, côté serveur uniquement (0 en prédiction client).
+	// 1.20.6 (pré-refonte 1.21) : le bonus de dégâts d'enchant (sharpness, smite, bane) se lit
+	// directement sur l'arme en main, en fonction du type de la cible.
 	private static float enchantDamageBonus(Player player, Entity target, float baseDamage) {
-		if (player.level() instanceof ServerLevel serverLevel) {
-			return EnchantmentHelper.modifyDamage(serverLevel, player.getMainHandItem(), target,
-					player.damageSources().playerAttack(player), baseDamage) - baseDamage;
-		}
-		return 0.0F;
+		EntityType<?> targetType = target instanceof LivingEntity ? target.getType() : null;
+		return EnchantmentHelper.getDamageBonus(player.getMainHandItem(), targetType);
 	}
 
-	// 1.21 : getKnockbackBonus(player) supprimé. Le bonus de l'enchant Knockback passe par
-	// modifyKnockback (base 0), côté serveur uniquement (0 en prédiction client).
+	// 1.20.6 : le bonus de l'enchant Knockback se lit via getKnockbackBonus (niveau sur l'arme en main).
 	private static float enchantKnockbackBonus(Player player, Entity target) {
-		if (player.level() instanceof ServerLevel serverLevel) {
-			return EnchantmentHelper.modifyKnockback(serverLevel, player.getMainHandItem(), target,
-					player.damageSources().playerAttack(player), 0.0F);
-		}
-		return 0.0F;
+		return EnchantmentHelper.getKnockbackBonus(player);
 	}
 
 	/**
@@ -166,7 +159,7 @@ public class CombatHelper {
 		if (isAttackTimerOk && !isCritical(player, target) && !sprintAndAttackTimerOk && player.onGround()
 				&& walkDistanceDelta < (double) player.getSpeed()) {
 			ItemStack itemstack = player.getItemInHand(InteractionHand.MAIN_HAND);
-			canAttackSweep = itemstack.canPerformAction(net.neoforged.neoforge.common.ItemAbilities.SWORD_SWEEP);
+			canAttackSweep = itemstack.canPerformAction(net.neoforged.neoforge.common.ToolActions.SWORD_SWEEP);
 		}
 		
 		return canAttackSweep;

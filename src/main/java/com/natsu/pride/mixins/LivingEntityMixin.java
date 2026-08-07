@@ -77,9 +77,8 @@ public class LivingEntityMixin {
 		double startY = self.getY();
 		float friction = 0.8F;
 		float accel = 0.02F;
-		// 1.21 : Depth Strider n'est plus un niveau d'enchant (0-3) mais l'attribut
-		// WATER_MOVEMENT_EFFICIENCY (0.0-1.0). On le remet sur l'échelle 0-3 de la formule 1.8.9.
-		float depthStrider = (float) self.getAttributeValue(Attributes.WATER_MOVEMENT_EFFICIENCY) * 3.0F;
+		// 1.20.6 : Depth Strider est encore un niveau d'enchant (0-3), lu directement.
+		float depthStrider = EnchantmentHelper.getDepthStrider(self);
 		if (depthStrider > 3.0F) depthStrider = 3.0F;
 		if (!self.onGround()) depthStrider *= 0.5F;
 		if (depthStrider > 0.0F) {

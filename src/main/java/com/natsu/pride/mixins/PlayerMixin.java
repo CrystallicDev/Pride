@@ -130,7 +130,7 @@ public abstract class PlayerMixin {
 					}
 
 					if (canSweep) {
-						float sweepingDamage = 1.0F + (float) self.getAttributeValue(Attributes.SWEEPING_DAMAGE_RATIO) * totalDamage;
+						float sweepingDamage = 1.0F + EnchantmentHelper.getSweepingDamageRatio(self) * totalDamage;
 						for (LivingEntity livingentity : self.level().getEntitiesOfClass(LivingEntity.class,
 								self.getItemInHand(InteractionHand.MAIN_HAND).getSweepHitBox(self, targetEntity))) {
 							if (livingentity != self && livingentity != targetEntity && !self.isAlliedTo(livingentity)
@@ -165,10 +165,17 @@ public abstract class PlayerMixin {
 
 					self.setLastHurtMob(targetEntity);
 
-					// 1.21 : doPostAttackEffects remplace doPostHurtEffects/doPostDamageEffects ET l'aspect
-					// de feu (fire aspect n'est plus un niveau lu à part, c'est un effet post-attaque).
-					if (self.level() instanceof ServerLevel serverLevel) {
-						EnchantmentHelper.doPostAttackEffects(serverLevel, targetEntity, damagesource);
+					// 1.20.6 : pas de doPostAttackEffects ; on scinde les effets post-coup et l'aspect
+					// de feu (fondus ensemble en 1.21) redevient un niveau d'enchant appliqué à la main.
+					if (self.level() instanceof ServerLevel) {
+						if (targetEntity instanceof LivingEntity livingTarget) {
+							EnchantmentHelper.doPostHurtEffects(livingTarget, self);
+						}
+						EnchantmentHelper.doPostDamageEffects(self, targetEntity);
+					}
+					int fireAspect = EnchantmentHelper.getFireAspect(self);
+					if (fireAspect > 0) {
+						targetEntity.igniteForSeconds(fireAspect * 4);
 					}
 
 					ItemStack itemstack1 = self.getMainHandItem();

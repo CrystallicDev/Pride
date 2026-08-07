@@ -75,7 +75,7 @@ public final class PrideNetwork {
 	public record FeaturesPayload(byte version, float blockingReduction, List<String> keys) implements CustomPacketPayload {
 
 		public static final CustomPacketPayload.Type<FeaturesPayload> TYPE =
-				new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(Pride.MODID, "features"));
+				new CustomPacketPayload.Type<>(new ResourceLocation(Pride.MODID, "features"));
 
 		public static final StreamCodec<FriendlyByteBuf, FeaturesPayload> STREAM_CODEC = StreamCodec.of(
 				(buf, p) -> {

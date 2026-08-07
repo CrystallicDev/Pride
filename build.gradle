@@ -167,7 +167,7 @@ publishing {
 tasks.register('archiveBuild', Copy) {
     from layout.buildDirectory.file("libs/${mod_id}-${mod_version}.jar")
     into "${projectDir}/../builds"
-    rename { "${mod_id}-${minecraft_version}-${mod_version}.jar" }
+    rename { "${mod_id}-${minecraft_version}-${mod_loader}-${mod_version}.jar" }
 }
 tasks.named('build').configure { finalizedBy 'archiveBuild' }
 
