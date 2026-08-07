@@ -12,9 +12,11 @@ import net.minecraft.world.item.BowItem;
 @Mixin(value = BowItem.class, remap = false)
 public class BowItemMixin {
 
-	@ModifyArg(method = "releaseUsing",
+	// 1.20.6 : le tir est passé de releaseUsing à shootProjectile (ProjectileWeaponItem), qui appelle
+	// Projectile.shootFromRotation (et non plus AbstractArrow). On modifie l'inaccuracy (arg 5) là.
+	@ModifyArg(method = "shootProjectile",
 			at = @At(value = "INVOKE",
-					target = "Lnet/minecraft/world/entity/projectile/AbstractArrow;shootFromRotation(Lnet/minecraft/world/entity/Entity;FFFFF)V"),
+					target = "Lnet/minecraft/world/entity/projectile/Projectile;shootFromRotation(Lnet/minecraft/world/entity/Entity;FFFFF)V"),
 			index = 5)
 	private float removeArrowDispersion(float inaccuracy) {
 		if (PrideFeature.REMOVE_ARROW_DISPERSION.enabled()) {
