@@ -44,10 +44,11 @@ public final class PrideNetwork {
 
 	public static void register() {
 		// 1.20.6 : NetworkRegistry supprimé → ChannelBuilder. optional() = canal accepté même absent
-		// des deux côtés (le mod n'exige pas que le serveur le connaisse).
+		// des deux côtés. ATTENTION à l'ordre : optional() fige un test exact(version) courant comme
+		// repli, donc networkProtocolVersion() DOIT être appelé AVANT optional() (sinon exact(0) ≠ 1).
 		channel = ChannelBuilder.named(CHANNEL_ID)
-				.optional()
 				.networkProtocolVersion(PROTOCOL_VERSION)
+				.optional()
 				.eventNetworkChannel();
 		channel.addListener(PrideNetwork::onPayload);
 	}
