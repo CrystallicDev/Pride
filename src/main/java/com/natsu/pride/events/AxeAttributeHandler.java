@@ -14,14 +14,14 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 /**
- * Réduit de 2 les dégâts de base de toute hache, via son modificateur d'attribut.
- * Passer par l'attribut (plutôt qu'au moment du coup) met à jour la valeur affichée
- * dans le tooltip en plus des dégâts réels.
+ * Knocks 2 off the base damage of every axe through its attribute modifier.
+ * Doing it on the attribute (rather than at hit time) also keeps the tooltip number
+ * in sync with the real damage.
  */
 @Mod.EventBusSubscriber(modid = Pride.MODID)
 public class AxeAttributeHandler {
 
-	// Item.BASE_ATTACK_DAMAGE_UUID (protected) : UUID du modificateur "dégâts de base" d'une arme.
+	// Item.BASE_ATTACK_DAMAGE_UUID (protected): the UUID of a weapon's "base damage" modifier.
 	private static final UUID BASE_ATTACK_DAMAGE = UUID.fromString("CB3F55D3-645C-4F38-A497-9C13A33DB5CF");
 
 	@SubscribeEvent
