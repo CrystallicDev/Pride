@@ -16,8 +16,8 @@ import net.minecraft.world.phys.Vec3;
 @Mixin(Projectile.class)
 public class ProjectileMixin {
 
-	// 1.8.9 : les flèches n'héritent pas de la vélocité du tireur (le vanilla l'ajoute
-	// après avoir orienté la flèche dans shootFromRotation).
+	// 1.8.9: arrows don't inherit the shooter's velocity (vanilla adds it after
+	// aiming the arrow in shootFromRotation).
 	@WrapOperation(method = "shootFromRotation",
 			at = @At(value = "INVOKE", target = "Lnet/minecraft/world/phys/Vec3;add(DDD)Lnet/minecraft/world/phys/Vec3;"))
 	private Vec3 noVelocityInherit(Vec3 arrowDelta, double x, double y, double z, Operation<Vec3> original) {
@@ -27,8 +27,8 @@ public class ProjectileMixin {
 		return original.call(arrowDelta, x, y, z);
 	}
 
-	// 1.8.9 : une flèche peut toucher son propre tireur après une courte immunité (5 ticks),
-	// au lieu d'attendre qu'elle quitte sa boîte gonflée de 1 bloc -> permet le bow boost.
+	// 1.8.9: an arrow can hit its own shooter after a short immunity (5 ticks), instead
+	// of waiting until it leaves the 1-block inflated box -> this is what enables bow boosting.
 	@ModifyExpressionValue(method = "canHitEntity",
 			at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/projectile/Projectile;leftOwner:Z", opcode = Opcodes.GETFIELD))
 	private boolean allowSelfHitAfterDelay(boolean leftOwner) {

@@ -42,7 +42,7 @@ public abstract class PlayerMixin {
 
 	private boolean isReducingParryDamage = false;
 
-	// pas de swing en droppant depuis l'inventaire
+	// no swing when dropping from the inventory
 	@WrapOperation(method = "drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;",
 			at = @At(value = "INVOKE",
 					target = "Lnet/minecraft/world/entity/player/Player;swing(Lnet/minecraft/world/InteractionHand;)V"))
@@ -51,7 +51,7 @@ public abstract class PlayerMixin {
 		original.call(instance, hand);
 	}
 
-	// pas de nage (1.8.9)
+	// no swimming (1.8.9)
 	@Inject(method = "updateSwimming", at = @At("HEAD"), cancellable = true)
 	private void preventSwimming(CallbackInfo ci) {
 		if (!PrideFeature.DISABLE_SWIMMING.enabled()) return;
@@ -59,7 +59,7 @@ public abstract class PlayerMixin {
 		ci.cancel();
 	}
 
-	// Cooldown gameplay (dégâts/knockback selon la charge d'attaque). Toggle par type d'arme.
+	// gameplay cooldown (damage/knockback scale with the attack charge). toggle per weapon type.
 	@Inject(method = "getAttackStrengthScale", at = @At("HEAD"), cancellable = true)
 	public void getAttackStrengthScale(float f, CallbackInfoReturnable<Float> cir) {
 	    if (!PrideFeature.active()) return;
@@ -76,7 +76,7 @@ public abstract class PlayerMixin {
 
         Player self = (Player)(Object) this;
 
-        // pas de isBlocking() : Forge le réserve aux items avec ToolActions.SHIELD_BLOCK
+        // no isBlocking() here: Forge reserves it for items with ToolActions.SHIELD_BLOCK
         if (!self.isUsingItem()) return;
         if (!(self.getUseItem().getItem() instanceof SwordItem)) return;
         if (source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_ARMOR)) return;
@@ -95,7 +95,7 @@ public abstract class PlayerMixin {
 	public void attack(Entity targetEntity, CallbackInfo ci) {
 		Player self = (Player) (Object) this;
 
-		// en bloquant : swing autorisé, mais pas de vrai coup
+		// while blocking: the swing is allowed, but no actual hit lands
 		if (PrideFeature.ALLOW_SWORD_BLOCKING.enabled()
 				&& self.isUsingItem() && self.getUseItem().getItem() instanceof SwordItem) {
 			ci.cancel();
@@ -216,7 +216,7 @@ public abstract class PlayerMixin {
 								targetEntity.setSecondsOnFire(hasFireAspect * 4);
 							}
 
-							// particules de dégâts (coeurs) : elles n'existent pas en 1.8
+							// damage indicator particles: they don't exist in 1.8
 							if (!PrideFeature.REVERT_DAMAGE_LOGIC.enabled() && self.level instanceof ServerLevel && damageDealt > 2.0F) {
 								int hasEnoughDamageForParticles = (int) ((double) damageDealt * 0.5D);
 								((ServerLevel) self.level).sendParticles(ParticleTypes.DAMAGE_INDICATOR, targetEntity.getX(),

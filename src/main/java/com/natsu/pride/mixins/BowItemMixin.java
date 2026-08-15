@@ -8,7 +8,7 @@ import com.natsu.pride.features.PrideFeature;
 
 import net.minecraft.world.item.BowItem;
 
-// pas de dispersion des flèches (1.8.9)
+// no arrow spread (1.8.9)
 @Mixin(BowItem.class)
 public class BowItemMixin {
 
