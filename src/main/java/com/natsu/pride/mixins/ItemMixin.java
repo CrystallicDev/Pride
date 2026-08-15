@@ -16,7 +16,7 @@ import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
 
-// Hit & block : clic droit maintenu avec une épée (offhand vide) pour bloquer
+// hit & block: hold right click with a sword (empty offhand) to block
 @Mixin(value = Item.class, remap = false)
 public class ItemMixin {
 

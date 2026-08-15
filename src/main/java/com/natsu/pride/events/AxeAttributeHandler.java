@@ -14,20 +14,20 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 /**
- * Réduit de 2 les dégâts de base de toute hache, via son composant de modificateurs par défaut.
- * Passer par l'attribut (plutôt qu'au moment du coup) met à jour la valeur affichée
- * dans le tooltip en plus des dégâts réels.
+ * Knocks 2 off the base damage of every axe through its default attribute-modifiers component.
+ * Doing it on the attribute (rather than at hit time) also keeps the tooltip number
+ * in sync with the real damage.
  *
- * <p>1.20.6 : {@code ItemAttributeModifierEvent} n'existe plus côté Forge (les modificateurs sont le
- * composant {@link ItemAttributeModifiers}). On patche {@link DataComponents#ATTRIBUTE_MODIFIERS} à
- * l'enregistrement de l'item via {@link GatherComponentsEvent.Item} (bus MOD).
+ * <p>Weapon modifiers live in the {@link ItemAttributeModifiers} component, so we patch
+ * {@link DataComponents#ATTRIBUTE_MODIFIERS} when the item is registered, through
+ * {@link GatherComponentsEvent.Item}.
  */
-// GatherComponentsEvent est diffusé sur le bus FORGE (jeu), pas MOD ; il est posté "lazily"
-// au premier accès aux composants d'un item (après le chargement), donc les items vanilla sont bien vus.
+// GatherComponentsEvent fires on the FORGE (game) bus, not MOD; it's posted lazily on the first
+// access to an item's components (after load), so vanilla items get seen too.
 @Mod.EventBusSubscriber(modid = Pride.MODID)
 public class AxeAttributeHandler {
 
-	// UUID vanilla du modificateur "dégâts de base" d'une arme (Item.BASE_ATTACK_DAMAGE_UUID, protected).
+	// vanilla UUID of a weapon's "base damage" modifier (Item.BASE_ATTACK_DAMAGE_UUID, protected).
 	private static final UUID BASE_ATTACK_DAMAGE = UUID.fromString("CB3F55D3-645C-4F38-A497-9C13A33DB5CF");
 
 	@SubscribeEvent

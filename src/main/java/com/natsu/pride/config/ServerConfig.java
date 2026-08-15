@@ -115,7 +115,7 @@ public class ServerConfig {
 		SPEC = builder.build();
 	}
 
-	/** La config SERVER n'est pas chargée dans les menus : à vérifier avant tout .get() dans un mixin. */
+	/** The SERVER config isn't loaded in the menus, so check this before any .get() in a mixin. */
 	public static boolean loaded() {
 		return SPEC.isLoaded();
 	}

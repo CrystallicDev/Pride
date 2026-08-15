@@ -35,8 +35,8 @@ public class LivingEntityMixin {
 		}
 	}
 
-	// Knockback de base 1.8.9 : identique à la 1.18 sauf le soulèvement vertical,
-	// qui s'applique à chaque coup (la 1.18 ne soulève que si la cible est au sol).
+	// 1.8.9 base knockback: same as 1.18 except the vertical lift, which happens on
+	// every hit here (1.18 only lifts you when the target is on the ground).
 	@Inject(method = "knockback", at = @At("HEAD"), cancellable = true)
 	private void oldSchoolKnockback(double strength, double x, double z, CallbackInfo ci) {
 		if (!PrideFeature.REVERT_KNOCKBACK.enabled()) return;
@@ -62,9 +62,9 @@ public class LivingEntityMixin {
 		ci.cancel();
 	}
 
-	// Remplace intégralement le mouvement dans l'eau par celui de la 1.8.9 :
-	// friction 0.8 constante, gravité verticale -0.02, bump de surface, et le
-	// terme Depth Strider basé sur getSpeed() (sprint inclus, comme getAIMoveSpeed 1.8.9).
+	// fully swaps water movement for the 1.8.9 one: constant 0.8 friction, -0.02 vertical
+	// gravity, a surface bump, and a Depth Strider term based on getSpeed()
+	// (sprint included, like 1.8.9's getAIMoveSpeed).
 	@Inject(method = "travel", at = @At("HEAD"), cancellable = true)
 	private void oldSchoolWaterMovement(Vec3 input, CallbackInfo ci) {
 		if (!PrideFeature.DISABLE_SWIMMING.enabled()) return;
@@ -103,7 +103,7 @@ public class LivingEntityMixin {
 		ci.cancel();
 	}
 
-	// équivalent du isFree(x,y,z) privé de Entity
+	// same thing as Entity's private isFree(x,y,z)
 	private static boolean isFree(LivingEntity self, double x, double y, double z) {
 		AABB box = self.getBoundingBox().move(x, y, z);
 		return self.level().noCollision(self, box) && !self.level().containsAnyLiquid(box);
@@ -127,7 +127,7 @@ public class LivingEntityMixin {
 		cir.setReturnValue(backwards ? -dist : dist);
 	}
 
-	// retire le retournement du corps en marche arrière (ajouté en 1.9)
+	// drops the backwards body flip (added in 1.9)
 	@ModifyConstant(method = "tick", constant = @Constant(floatValue = 95.0F), require = 0)
 	private float removeBackwardsBodyFlip(float value) {
 		if (PrideFeature.CHANGE_BODY_RENDER.enabled()

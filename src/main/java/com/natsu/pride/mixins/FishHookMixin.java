@@ -42,7 +42,7 @@ public class FishHookMixin {
 		double motionZ = (double)(Mth.cos(yaw / 180.0F * (float)Math.PI) * Mth.cos(pitch / 180.0F * (float)Math.PI) * f);
 		double motionY = (double)(-Mth.sin(pitch / 180.0F * (float)Math.PI) * f);
 
-		// handleHookCasting avec speed=1.5F et inaccuracy=1.0F
+		// handleHookCasting with speed=1.5F and inaccuracy=1.0F
 		float speed = 1.5F;
 		float inaccuracy = 1.0F;
 		double len = Math.sqrt(motionX * motionX + motionY * motionY + motionZ * motionZ);

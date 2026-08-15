@@ -11,13 +11,13 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BucketItem;
 
 /**
- * MLG 1.8.9 : en 1.8.9 le waterlogging n'existe pas, donc vider un seau pose toujours une vraie
- * source où l'on peut atterrir. En moderne, viser une dalle/un escalier "absorbe" l'eau dans le
- * bloc et fait rater le clutch.
+ * 1.8.9 MLG: waterlogging doesn't exist in 1.8.9, so emptying a bucket always places a real
+ * source you can land in. On modern versions, aiming at a slab or stairs "soaks up" the water into
+ * the block and the clutch fails.
  *
- * <p>Fix : on fait échouer {@code canPlaceLiquid} quand le joueur ne sneak PAS. {@code emptyContents}
- * retombe alors tout seul sur la face cliquée et y pose une source. En sneakant, le comportement
- * vanilla est conservé (waterlogging volontaire).
+ * <p>Fix: we make {@code canPlaceLiquid} fail when the player is NOT sneaking. {@code emptyContents}
+ * then falls back on its own to the clicked face and places a source there. Sneaking keeps the
+ * vanilla behaviour (waterlogging on purpose).
  */
 @Mixin(value = BucketItem.class, remap = false)
 public class BucketItemMixin {

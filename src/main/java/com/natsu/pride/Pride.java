@@ -14,8 +14,8 @@ public class Pride {
 
     public Pride() {
     	ModLoadingContext.get().registerConfig(Type.SERVER, ServerConfig.SPEC);
-    	// La connexion aux serveurs sans Pride (vanilla, Paper, Forge sans le mod) est autorisée
-    	// via displayTest="IGNORE_ALL_VERSION" dans mods.toml ; le canal réseau est optionnel.
+    	// connecting to servers without Pride (vanilla, Paper, Forge without the mod) is allowed
+    	// via displayTest="IGNORE_ALL_VERSION" in mods.toml; the network channel is optional.
     	PrideNetwork.register();
     	MixinExtrasBootstrap.init();
     }
