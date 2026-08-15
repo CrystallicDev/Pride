@@ -16,8 +16,8 @@ public class Pride {
 
     public Pride() {
     	ModLoadingContext.get().registerConfig(Type.SERVER, ServerConfig.SPEC);
-    	// Autorise la connexion aux serveurs sans Pride (vanilla, Paper, Forge sans le mod) :
-    	// toutes les features restent alors désactivées (voir PrideFeature).
+    	// lets you connect to servers that don't have Pride (vanilla, Paper, Forge without the mod):
+    	// all the features just stay off in that case (see PrideFeature).
     	ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class,
     			() -> new IExtensionPoint.DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (remote, isServer) -> true));
     	PrideNetwork.register();

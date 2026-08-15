@@ -17,7 +17,7 @@ import net.minecraft.world.item.SwordItem;
 @Mixin(Minecraft.class)
 public class MinecraftMixin {
 
-	// swing visible en bloquant : on consomme les clics d'attaque pour l'anim seule
+	// visible swing while blocking: we swallow the attack clicks just for the animation
 	@Inject(method = "handleKeybinds", at = @At("HEAD"))
 	private void swingWhileBlocking(CallbackInfo ci) {
 		if (!PrideFeature.ALLOW_SWORD_BLOCKING.enabled()) return;
@@ -30,7 +30,7 @@ public class MinecraftMixin {
 		}
 	}
 
-	// pas de swing en droppant un item (Q)
+	// no swing when dropping an item (Q)
 	@WrapOperation(method = "handleKeybinds",
 			at = @At(value = "INVOKE",
 					target = "Lnet/minecraft/client/player/LocalPlayer;swing(Lnet/minecraft/world/InteractionHand;)V"))

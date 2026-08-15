@@ -8,7 +8,7 @@ import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-/** Reset du pilotage à la déconnexion : on ne garde jamais un état PILOTED d'un serveur quitté. */
+/** Reset piloting on disconnect: we never keep a PILOTED state from a server we left. */
 @Mod.EventBusSubscriber(modid = Pride.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
 public class PrideClientNetworkEvents {
 
