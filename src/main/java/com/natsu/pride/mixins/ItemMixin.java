@@ -17,7 +17,7 @@ import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
 
-// Hit & block : clic droit maintenu avec une épée (offhand vide) pour bloquer
+// hit & block: hold right click with a sword (empty offhand) to block
 @Mixin(value = Item.class, remap = false)
 public class ItemMixin {
 
@@ -35,7 +35,6 @@ public class ItemMixin {
 		cir.setReturnValue(InteractionResultHolder.consume(stack));
 	}
 
-	// 1.21 : getUseDuration prend désormais (ItemStack, LivingEntity).
 	@Inject(method = "getUseDuration", at = @At("HEAD"), cancellable = true)
 	private void getUseDuration(ItemStack stack, LivingEntity entity, CallbackInfoReturnable<Integer> cir) {
 		if (!PrideFeature.ALLOW_SWORD_BLOCKING.enabled()) return;

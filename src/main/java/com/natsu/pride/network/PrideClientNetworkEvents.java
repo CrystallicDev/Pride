@@ -8,8 +8,8 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 
-// bus par défaut = GAME (bus d'événements NeoForge), correct pour ClientPlayerNetworkEvent.
-/** Reset du pilotage à la déconnexion : on ne garde jamais un état PILOTED d'un serveur quitté. */
+// default bus = GAME (the NeoForge event bus), which is right for ClientPlayerNetworkEvent.
+/** Reset piloting on disconnect: we never keep a PILOTED state from a server we left. */
 @EventBusSubscriber(modid = Pride.MODID, value = Dist.CLIENT)
 public class PrideClientNetworkEvents {
 

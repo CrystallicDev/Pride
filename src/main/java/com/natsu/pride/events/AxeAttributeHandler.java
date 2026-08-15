@@ -13,12 +13,12 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.ItemAttributeModifierEvent;
 
 /**
- * Réduit de 2 les dégâts de base de toute hache, via son modificateur d'attribut.
- * Passer par l'attribut (plutôt qu'au moment du coup) met à jour la valeur affichée
- * dans le tooltip en plus des dégâts réels.
+ * Knocks 2 off the base damage of every axe through its attribute modifier.
+ * Doing it on the attribute (rather than at hit time) also keeps the tooltip number
+ * in sync with the real damage.
  *
- * <p>1.21 : les modificateurs d'items sont le composant {@link ItemAttributeModifiers} ; l'entrée
- * "dégâts de base" est identifiée par {@link Item#BASE_ATTACK_DAMAGE_ID} (une ResourceLocation).
+ * <p>Item modifiers live in the {@link ItemAttributeModifiers} component; the "base damage" entry
+ * is the one identified by {@link Item#BASE_ATTACK_DAMAGE_ID} (a ResourceLocation).
  */
 @EventBusSubscriber(modid = Pride.MODID)
 public class AxeAttributeHandler {

@@ -11,19 +11,19 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BucketItem;
 
 /**
- * MLG 1.8.9 : en 1.8.9 le waterlogging n'existe pas, donc vider un seau vise toujours à poser une
- * vraie source où l'on peut atterrir. En moderne, viser une dalle/un escalier "absorbe" l'eau dans
- * le bloc et fait rater le clutch.
+ * 1.8.9 MLG: waterlogging doesn't exist in 1.8.9, so emptying a bucket always aims to place a
+ * real source you can land in. On modern versions, aiming at a slab or stairs "soaks up" the water
+ * into the block, and the clutch fails.
  *
- * <p>Fix : on fait échouer {@code canPlaceLiquid} quand le joueur ne sneak PAS. {@code emptyContents}
- * retombe alors tout seul sur la face cliquée ({@code pos.relative(direction)}) et y pose une source.
- * En sneakant, le comportement vanilla est conservé (waterlogging volontaire).
+ * <p>Fix: we make {@code canPlaceLiquid} fail when the player is NOT sneaking. {@code emptyContents}
+ * then falls back on its own to the clicked face ({@code pos.relative(direction)}) and places a source there.
+ * Sneaking keeps the vanilla behaviour (waterlogging on purpose).
  */
 @Mixin(value = BucketItem.class, remap = false)
 public class BucketItemMixin {
 
-	// target sans descripteur : matche canPlaceLiquid quelle que soit sa signature (elle varie
-	// selon les versions — le paramètre Player n'a été ajouté qu'en 1.21).
+	// target with no descriptor: matches canPlaceLiquid whatever its signature (which changes
+	// between versions).
 	@ModifyExpressionValue(
 			method = "emptyContents(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/phys/BlockHitResult;Lnet/minecraft/world/item/ItemStack;)Z",
 			at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/LiquidBlockContainer;canPlaceLiquid"))
