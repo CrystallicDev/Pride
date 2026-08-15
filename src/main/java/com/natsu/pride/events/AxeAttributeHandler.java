@@ -17,12 +17,12 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.ItemAttributeModifierEvent;
 
 /**
- * Réduit de 2 les dégâts de base de toute hache, via son modificateur d'attribut.
- * Passer par l'attribut (plutôt qu'au moment du coup) met à jour la valeur affichée
- * dans le tooltip en plus des dégâts réels.
+ * Knocks 2 off the base damage of every axe through its attribute modifier.
+ * Doing it on the attribute (rather than at hit time) also keeps the tooltip number
+ * in sync with the real damage.
  *
- * <p>1.20.6 : les modificateurs de l'event sont un {@code Multimap<Holder<Attribute>, AttributeModifier>} ;
- * l'entrée "dégâts de base" est identifiée par l'UUID {@link Item#BASE_ATTACK_DAMAGE_UUID}.
+ * <p>The event's modifiers are a {@code Multimap<Holder<Attribute>, AttributeModifier>};
+ * the "base damage" entry is the one whose UUID is {@link Item#BASE_ATTACK_DAMAGE_UUID}.
  */
 @EventBusSubscriber(modid = Pride.MODID)
 public class AxeAttributeHandler {
@@ -33,7 +33,7 @@ public class AxeAttributeHandler {
 		if (!(event.getItemStack().getItem() instanceof AxeItem)) return;
 
 		Multimap<Holder<Attribute>, AttributeModifier> modifiers = event.getModifiers();
-		// copie défensive : removeModifier/addModifier modifient la multimap pendant l'itération
+		// defensive copy: removeModifier/addModifier mutate the multimap while we're iterating
 		for (AttributeModifier modifier : List.copyOf(modifiers.get(Attributes.ATTACK_DAMAGE))) {
 			if (modifier.id().equals(Item.BASE_ATTACK_DAMAGE_UUID)) {
 				event.removeModifier(Attributes.ATTACK_DAMAGE, modifier);

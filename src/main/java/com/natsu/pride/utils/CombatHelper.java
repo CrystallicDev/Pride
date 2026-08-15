@@ -24,21 +24,21 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 public class CombatHelper {
 
 	/**
-	 * Armes lourdes (hache, masse, trident) : équilibrées AUTOUR du délai de coup (dégâts réduits si on
-	 * frappe trop tôt), contrairement à l'épée qui doit pouvoir spammer comme en 1.8.9.
+	 * Heavy weapons (axe, mace, trident): balanced AROUND the attack delay (reduced damage if you
+	 * swing too early), unlike the sword which needs to spam like in 1.8.9.
 	 */
 	public static boolean isHeavyWeapon(ItemStack stack) {
 		Item item = stack.getItem();
 		return item instanceof AxeItem || item instanceof MaceItem || item instanceof TridentItem;
 	}
 
-	/** Le cooldown d'attaque est-il désactivé pour l'arme tenue ? Un toggle de config par type d'arme. */
+	/** Is the attack cooldown disabled for the held weapon? A config toggle per weapon type. */
 	public static boolean attackCooldownDisabledFor(ItemStack stack) {
 		Item item = stack.getItem();
 		if (item instanceof AxeItem) return PrideFeature.DISABLE_AXE_ATTACK_COOLDOWN.enabled();
 		if (item instanceof MaceItem) return PrideFeature.DISABLE_MACE_ATTACK_COOLDOWN.enabled();
 		if (item instanceof TridentItem) return PrideFeature.DISABLE_TRIDENT_ATTACK_COOLDOWN.enabled();
-		// épée + tout le reste (léger)
+		// sword + everything else (light)
 		return PrideFeature.DISABLE_SWORD_ATTACK_COOLDOWN.enabled();
 	}
 
@@ -46,8 +46,8 @@ public class CombatHelper {
 	 * Returns the base damage of an {@link Player} depending on {@link Pride}'s config
 	 * */
 	public static float getBaseDamage(Player player) {
-		// Le -2 des haches est porté par leur modificateur d'attribut (AxeAttributeHandler),
-		// donc déjà pris en compte ici et affiché dans le tooltip.
+		// the axe's -2 rides on its attribute modifier (AxeAttributeHandler), so it's already
+		// counted here and shown in the tooltip.
 		return (float) player.getAttributeValue(Attributes.ATTACK_DAMAGE);
 	}
 
@@ -80,14 +80,14 @@ public class CombatHelper {
 		return attackKnockback;
 	}
 
-	// 1.20.6 (pré-refonte 1.21) : le bonus de dégâts d'enchant (sharpness, smite, bane) se lit
-	// directement sur l'arme en main, en fonction du type de la cible.
+	// the enchant damage bonus (sharpness, smite, bane) is read straight off the held
+	// weapon, based on the target's type.
 	private static float enchantDamageBonus(Player player, Entity target, float baseDamage) {
 		EntityType<?> targetType = target instanceof LivingEntity ? target.getType() : null;
 		return EnchantmentHelper.getDamageBonus(player.getMainHandItem(), targetType);
 	}
 
-	// 1.20.6 : le bonus de l'enchant Knockback se lit via getKnockbackBonus (niveau sur l'arme en main).
+	// the Knockback enchant bonus is read via getKnockbackBonus (level on the held weapon).
 	private static float enchantKnockbackBonus(Player player, Entity target) {
 		return EnchantmentHelper.getKnockbackBonus(player);
 	}
@@ -99,8 +99,8 @@ public class CombatHelper {
 		if (PrideFeature.REVERT_DAMAGE_LOGIC.enabled()) {
 			// Calculate the damage based on mappings from 1.8.9.
 			float additionalDamage = enchantDamageBonus(player, target, baseDamage);
-			// Les armes lourdes gardent le délai des coups (dégâts réduits si on frappe trop tôt),
-			// même en combat 1.8 — sauf si le cooldown de CETTE arme est explicitement désactivé.
+			// heavy weapons keep the attack delay (reduced damage if you swing too early), even
+			// in 1.8 combat, unless the cooldown for THIS weapon is explicitly disabled.
 			if (isHeavyWeapon(player.getMainHandItem())
 					&& !attackCooldownDisabledFor(player.getMainHandItem())) {
 				float attackStrengthScale = player.getAttackStrengthScale(0.5F);

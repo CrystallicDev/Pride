@@ -21,19 +21,19 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 /**
- * Canal de pilotage par le serveur (plugin Paper / proxy). Le mod ECOUTE seulement (playToClient) :
- * un serveur envoie sur {@code pride:features} la liste des features à activer côté client, ce qui
- * bascule {@link PrideFeature} en mode PILOTED. Canal OPTIONNEL ({@code .optional()}) : la connexion
- * à un serveur sans ce canal (vanilla, Paper nu…) reste possible, features à off.
+ * The server-driven channel (Paper plugin / proxy). The mod only LISTENS (playToClient): a server
+ * sends the list of features to enable client-side on {@code pride:features}, which flips
+ * {@link PrideFeature} into PILOTED mode. The channel is OPTIONAL ({@code .optional()}): connecting
+ * to a server without it (vanilla, bare Paper...) still works, with features off.
  *
- * <p>Format du payload (clientbound), versionné pour rester compatible avec des plugins tiers :
+ * <p>Payload format (clientbound), versioned so third-party plugins stay compatible:
  * <pre>
- *   byte    version           (actuellement 1)
- *   float   blockingReduction (réduction de dégâts en blocage épée, 0..1)
+ *   byte    version           (currently 1)
+ *   float   blockingReduction (sword-blocking damage reduction, 0..1)
  *   varInt  count
- *   count × Utf(featureKey)   clés des features ACTIVÉES (cf. PrideFeature#key, ex. "revertKnockback")
+ *   count × Utf(featureKey)   keys of the ENABLED features (see PrideFeature#key, e.g. "revertKnockback")
  * </pre>
- * Une clé inconnue est ignorée (compat ascendante) ; une version inconnue fait ignorer le message.
+ * An unknown key is ignored (forward compat); an unknown version makes the whole message get dropped.
  */
 public final class PrideNetwork {
 
@@ -60,8 +60,8 @@ public final class PrideNetwork {
 		for (String key : payload.keys()) {
 			PrideFeature f = PrideFeature.byKey(key);
 			if (f == null) continue;
-			// Une feature serveur (dégâts, knockback...) est du ressort du plugin : le client
-			// ne l'applique pas, sinon il prédit un état que le serveur ne confirme pas.
+			// a server feature (damage, knockback...) is the plugin's job: the client doesn't
+			// apply it, otherwise it predicts a state the server never confirms.
 			if (!f.pilotable()) {
 				LOGGER.warn("[Pride] feature serveur '{}' reçue mais ignorée (à gérer côté plugin)", key);
 				continue;
