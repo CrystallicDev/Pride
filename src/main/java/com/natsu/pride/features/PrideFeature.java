@@ -8,18 +8,18 @@ import com.natsu.pride.config.ServerConfig;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 /**
- * Source de vérité unique des features, consultée par tous les mixins.
- * Trois modes :
- * - STANDALONE : solo ou serveur Forge avec Pride, la config serveur (synchronisée) décide ;
- * - PILOTED : serveur non-Forge qui pilote le mod via plugin messaging (protocole à venir) ;
- * - OFF : serveur sans Pride, tout est désactivé (comportement vanilla).
+ * The single source of truth for features, every mixin asks it.
+ * Three modes:
+ * - STANDALONE: singleplayer or a Forge server with Pride, the (synced) server config decides;
+ * - PILOTED: a non-Forge server driving the mod through plugin messaging (protocol coming later);
+ * - OFF: a server without Pride, everything is off (vanilla behaviour).
  */
 public enum PrideFeature {
 
-	// SERVER = effet autoritaire côté serveur (dégâts, knockback, entités, sons du flux d'attaque) :
-	//          en mode piloté c'est le plugin qui le fait, le client ne l'applique PAS (sinon desync).
-	// CLIENT = rendu / animation / mouvement-input local : le client doit le faire.
-	// BOTH   = partie client (pose/anim) + partie serveur (ex. réduction de dégâts en blocage).
+	// SERVER = server-authoritative effect (damage, knockback, entities, attack-flow sounds):
+	//          when piloted the plugin does it, the client does NOT apply it (otherwise desync).
+	// CLIENT = local rendering / animation / movement-input: the client has to do it.
+	// BOTH   = a client part (pose/anim) plus a server part (e.g. blocking damage reduction).
 	REVERT_DAMAGE_LOGIC("revertDamageLogic", Side.SERVER, ServerConfig.REVERT_DAMAGE_LOGIC),
 	REVERT_KNOCKBACK("revertKnockback", Side.SERVER, ServerConfig.REVERT_KNOCKBACK),
 	ALLOW_SWORD_BLOCKING("allowSwordBlocking", Side.BOTH, ServerConfig.ALLOW_SWORD_BLOCKING),
@@ -35,7 +35,7 @@ public enum PrideFeature {
 	SHIELDS_ONLY_BLOCK_PROJECTILES("shieldsOnlyBlockProjectiles", Side.SERVER, ServerConfig.SHIELDS_ONLY_BLOCK_PROJECTILES),
 	DISABLE_SWIMMING("disableSwimming", Side.CLIENT, ServerConfig.DISABLE_SWIMMING),
 	SLOW_WHILE_USING_ITEM("slowWhileUsingItem", Side.CLIENT, ServerConfig.SLOW_WHILE_USING_ITEM),
-	// Placement de bloc = autoritaire serveur (le plugin s'en charge en mode piloté).
+	// block placement is server-authoritative (the plugin handles it when piloted).
 	WATERLOG_ONLY_WHEN_SNEAKING("waterlogOnlyWhenSneaking", Side.SERVER, ServerConfig.WATERLOG_ONLY_WHEN_SNEAKING),
 	PLAY_CRIT_SOUNDS("playCriticalHitSounds", Side.SERVER, ServerConfig.PLAY_CRIT_SOUNDS),
 	PLAY_STRONG_HIT_SOUNDS("playStrongHitSounds", Side.SERVER, ServerConfig.PLAY_STRONG_HIT_SOUNDS),
@@ -46,7 +46,7 @@ public enum PrideFeature {
 
 	public enum Side { CLIENT, SERVER, BOTH }
 
-	/** Clé stable utilisée sur le réseau (= clé de config) : découple le protocole de l'ordre de l'enum. */
+	/** Stable key used on the wire (= the config key): keeps the protocol independent of enum order. */
 	private final String key;
 	private final Side side;
 	private final ModConfigSpec.BooleanValue standaloneValue;
@@ -65,7 +65,7 @@ public enum PrideFeature {
 		return side;
 	}
 
-	/** Une feature est pilotable par un serveur distant si elle a une partie client (CLIENT ou BOTH). */
+	/** A feature can be driven by a remote server if it has a client part (CLIENT or BOTH). */
 	public boolean pilotable() {
 		return side != Side.SERVER;
 	}
@@ -80,13 +80,13 @@ public enum PrideFeature {
 	public boolean enabled() {
 		switch (mode()) {
 			case STANDALONE: return standaloneValue.get();
-			// En piloté, on n'applique jamais les features serveur : c'est le plugin qui les gère.
+			// when piloted we never apply server features, the plugin takes care of those.
 			case PILOTED: return pilotable() && piloted.contains(this);
 			default: return false;
 		}
 	}
 
-	// --- État global ---
+	// --- global state ---
 
 	public enum Mode { OFF, STANDALONE, PILOTED }
 
@@ -100,7 +100,7 @@ public enum PrideFeature {
 		return Mode.OFF;
 	}
 
-	/** Vrai dès qu'un mode est actif (config chargée ou pilotage serveur). */
+	/** True as soon as a mode is active (config loaded or being piloted by a server). */
 	public static boolean active() {
 		return mode() != Mode.OFF;
 	}
@@ -109,7 +109,7 @@ public enum PrideFeature {
 		return mode() == Mode.STANDALONE ? ServerConfig.BLOCKING_DAMAGE_REDUCTION.get() : pilotedBlockingReduction;
 	}
 
-	// --- Pilotage par un serveur non-Forge (rempli par le futur protocole plugin) ---
+	// --- driven by a non-Forge server (filled in by the upcoming plugin protocol) ---
 
 	public static void setPiloted(Set<PrideFeature> features, double blockingReduction) {
 		piloted.clear();

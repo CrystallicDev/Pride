@@ -8,10 +8,10 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.SweepAttackEvent;
 
 /**
- * 1.8.9 : les attaques de sweep n'existent pas. Le rewrite complet de {@code Player.attack} (qui
- * gérait ça) est différé (port_stage2) ; en attendant, comme Pride retire le cooldown d'attaque,
- * la condition de sweep vanilla ({@code attackStrengthScale > 0.9}) est presque toujours vraie et le
- * sweep se déclenche à chaque coup. On le neutralise via l'event NeoForge dédié.
+ * Sweep attacks don't exist in 1.8.9, and since Pride strips the attack cooldown, vanilla's
+ * sweep condition ({@code attackStrengthScale > 0.9}) is almost always true, so the sweep
+ * would otherwise fire on every single hit. We shut it off through NeoForge's dedicated
+ * SweepAttackEvent instead.
  */
 @EventBusSubscriber(modid = Pride.MODID)
 public class PrideCombatEvents {

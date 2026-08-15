@@ -17,9 +17,9 @@ import net.minecraft.world.item.SolidBucketItem;
 @Mixin(value = ItemInHandRenderer.class, remap = false)
 public class ItemInHandRendererMixin {
 
-	// La pose de blocage épée n'est plus gérée ici : en 26.1 renderArmWithItem applique nativement la
-	// pose "block" pour toute anim d'usage BLOCK (hors bouclier), donc l'épée (à qui ItemMixin fait
-	// renvoyer ItemUseAnimation.BLOCK) est déjà posée correctement. Un transform en plus la doublait.
+	// the sword blocking pose isn't handled here anymore: renderArmWithItem natively applies the
+	// "block" pose for any BLOCK use animation (shields aside), so the sword (which ItemMixin makes
+	// return ItemUseAnimation.BLOCK) is already posed right. An extra transform just doubled it up.
 
 	@WrapOperation(method = "tick",
 			at = @At(value = "INVOKE",

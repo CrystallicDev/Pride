@@ -12,8 +12,8 @@ import net.neoforged.fml.config.ModConfig;
 public class Pride {
 	public static final String MODID = "pride";
 
-	// NeoForge fournit Mixin + MixinExtras et les initialise lui-même (pas de bootstrap manuel).
-	// Le canal pride:features est OPTIONNEL → le mod peut rejoindre des serveurs vanilla/Paper.
+	// NeoForge ships Mixin + MixinExtras and inits them itself, so no manual bootstrap here.
+	// the pride:features channel is OPTIONAL -> the mod can still join vanilla/Paper servers.
 	public Pride(IEventBus modEventBus, ModContainer modContainer) {
 		modContainer.registerConfig(ModConfig.Type.SERVER, ServerConfig.SPEC);
 		PrideNetwork.register(modEventBus);

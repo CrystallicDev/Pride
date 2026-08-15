@@ -8,9 +8,9 @@ import com.natsu.pride.features.PrideFeature;
 
 import net.minecraft.world.item.BowItem;
 
-// pas de dispersion des flèches (1.8.9)
-// 1.21 : le tir est passé de BowItem.releaseUsing à ProjectileWeaponItem#shootProjectile (surchargé
-// par BowItem), qui appelle Projectile.shootFromRotation (plus AbstractArrow). On modifie l'inaccuracy là.
+// no arrow spread (1.8.9)
+// shooting goes through ProjectileWeaponItem#shootProjectile (overridden by BowItem), which
+// calls Projectile.shootFromRotation; we tweak the inaccuracy right there.
 @Mixin(value = BowItem.class, remap = false)
 public class BowItemMixin {
 

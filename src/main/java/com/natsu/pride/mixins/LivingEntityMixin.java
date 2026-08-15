@@ -27,8 +27,8 @@ import net.minecraft.world.phys.Vec3;
 @Mixin(value = LivingEntity.class, remap = false)
 public class LivingEntityMixin {
 
-	// 26.1 : isDamageSourceBlocked a disparu (blocage porté par le composant BLOCKS_ATTACKS).
-	// applyItemBlocking renvoie les dégâts bloqués : on renvoie 0 pour ne rien bloquer hors projectiles.
+	// blocking runs through the BLOCKS_ATTACKS component now, via applyItemBlocking, which returns
+	// the amount of damage blocked: we return 0 so nothing but projectiles gets blocked.
 	@Inject(method = "applyItemBlocking", at = @At("HEAD"), cancellable = true)
 	private void onlyBlockProjectiles(ServerLevel level, DamageSource source, float damage,
 			CallbackInfoReturnable<Float> cir) {
@@ -38,8 +38,8 @@ public class LivingEntityMixin {
 		}
 	}
 
-	// Knockback de base 1.8.9 : identique à la 1.18 sauf le soulèvement vertical, qui s'applique
-	// à chaque coup (la 1.18 ne soulève que si la cible est au sol).
+	// 1.8.9 base knockback: same as 1.18 except the vertical lift, which happens on
+	// every hit here (1.18 only lifts you when the target is on the ground).
 	@Inject(method = "knockback", at = @At("HEAD"), cancellable = true)
 	private void oldSchoolKnockback(double strength, double x, double z, CallbackInfo ci) {
 		if (!PrideFeature.REVERT_KNOCKBACK.enabled()) return;
@@ -65,9 +65,9 @@ public class LivingEntityMixin {
 		ci.cancel();
 	}
 
-	// Remplace intégralement le mouvement dans l'eau par celui de la 1.8.9 :
-	// friction 0.8 constante, gravité verticale -0.02, bump de surface, et le
-	// terme Depth Strider basé sur getSpeed() (sprint inclus, comme getAIMoveSpeed 1.8.9).
+	// fully swaps water movement for the 1.8.9 one: constant 0.8 friction, -0.02 vertical
+	// gravity, a surface bump, and a Depth Strider term based on getSpeed()
+	// (sprint included, like 1.8.9's getAIMoveSpeed).
 	@Inject(method = "travel", at = @At("HEAD"), cancellable = true)
 	private void oldSchoolWaterMovement(Vec3 input, CallbackInfo ci) {
 		if (!PrideFeature.DISABLE_SWIMMING.enabled()) return;
@@ -81,8 +81,8 @@ public class LivingEntityMixin {
 		double startY = self.getY();
 		float friction = 0.8F;
 		float accel = 0.02F;
-		// 1.21 : Depth Strider n'est plus un niveau d'enchant (0-3) mais l'attribut
-		// WATER_MOVEMENT_EFFICIENCY (0.0-1.0). On le remet sur l'échelle 0-3 de la formule 1.8.9.
+		// Depth Strider is the WATER_MOVEMENT_EFFICIENCY attribute (0.0-1.0) now, so we scale it
+		// back onto the 0-3 range the 1.8.9 formula expects.
 		float depthStrider = (float) self.getAttributeValue(Attributes.WATER_MOVEMENT_EFFICIENCY) * 3.0F;
 		if (depthStrider > 3.0F) depthStrider = 3.0F;
 		if (!self.onGround()) depthStrider *= 0.5F;
@@ -108,15 +108,15 @@ public class LivingEntityMixin {
 		ci.cancel();
 	}
 
-	// équivalent du isFree(x,y,z) privé de Entity
+	// same thing as Entity's private isFree(x,y,z)
 	private static boolean isFree(LivingEntity self, double x, double y, double z) {
 		AABB box = self.getBoundingBox().move(x, y, z);
 		return self.level().noCollision(self, box) && !self.level().containsAnyLiquid(box);
 	}
 
-	// 26.1 : tickHeadTurn est passé à void tickHeadTurn(float) — plus de dist en retour (l'anim de
-	// marche arrière est gérée côté appelant, via removeBackwardsBodyFlip). On réplique juste le clamp
-	// corps/tête façon 1.8.9 (±45° + poussée si diff importante) au lieu du ±50° vanilla.
+	// the backwards-walk animation is handled by the caller (via removeBackwardsBodyFlip), so here
+	// we just replicate the 1.8.9 body/head clamp (±45° + a push when the diff is big) instead of
+	// vanilla's ±50°.
 	@Inject(method = "tickHeadTurn", at = @At("HEAD"), cancellable = true)
 	private void oldSchoolBodyRotation(float yBodyRotT, CallbackInfo ci) {
 		if (!PrideFeature.CHANGE_BODY_RENDER.enabled()) return;
@@ -134,7 +134,7 @@ public class LivingEntityMixin {
 		ci.cancel();
 	}
 
-	// retire le retournement du corps en marche arrière (ajouté en 1.9)
+	// drops the backwards body flip (added in 1.9)
 	@ModifyConstant(method = "tick", constant = @Constant(floatValue = 95.0F), require = 0)
 	private float removeBackwardsBodyFlip(float value) {
 		if (PrideFeature.CHANGE_BODY_RENDER.enabled()

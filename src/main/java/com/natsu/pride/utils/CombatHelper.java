@@ -21,23 +21,23 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 public class CombatHelper {
 
 	/**
-	 * Armes lourdes (hache, masse, trident, lance) : elles sont équilibrées AUTOUR du délai de coup
-	 * (dégâts réduits si on frappe trop tôt), contrairement à l'épée qui doit pouvoir spammer comme en
-	 * 1.8.9 — d'où deux options de config distinctes. Détection par tag (hache/lance sont data-driven
-	 * en 26.1, plus de classe) + classe pour masse/trident qui n'ont pas de tag dédié.
+	 * Heavy weapons (axe, mace, trident, spear): balanced AROUND the attack delay (reduced damage
+	 * if you swing too early), unlike the sword which needs to spam like in 1.8.9, hence two
+	 * separate config options. Detected by tag (axe/spear are data-driven, no class to match) plus
+	 * a class check for mace/trident, which have no dedicated tag.
 	 */
 	public static boolean isHeavyWeapon(ItemStack stack) {
 		return stack.is(ItemTags.AXES) || stack.is(ItemTags.SPEARS)
 				|| stack.getItem() instanceof MaceItem || stack.getItem() instanceof TridentItem;
 	}
 
-	/** Le cooldown d'attaque est-il désactivé pour l'arme tenue ? Un toggle de config par type d'arme. */
+	/** Is the attack cooldown disabled for the held weapon? A config toggle per weapon type. */
 	public static boolean attackCooldownDisabledFor(ItemStack stack) {
 		if (stack.is(ItemTags.AXES)) return PrideFeature.DISABLE_AXE_ATTACK_COOLDOWN.enabled();
 		if (stack.is(ItemTags.SPEARS)) return PrideFeature.DISABLE_SPEAR_ATTACK_COOLDOWN.enabled();
 		if (stack.getItem() instanceof MaceItem) return PrideFeature.DISABLE_MACE_ATTACK_COOLDOWN.enabled();
 		if (stack.getItem() instanceof TridentItem) return PrideFeature.DISABLE_TRIDENT_ATTACK_COOLDOWN.enabled();
-		// épée + tout le reste (léger)
+		// sword + everything else (light)
 		return PrideFeature.DISABLE_SWORD_ATTACK_COOLDOWN.enabled();
 	}
 
@@ -46,8 +46,8 @@ public class CombatHelper {
 	 * Returns the base damage of an {@link Player} depending on {@link Pride}'s config
 	 * */
 	public static float getBaseDamage(Player player) {
-		// Le -2 des haches est porté par leur modificateur d'attribut (AxeAttributeHandler),
-		// donc déjà pris en compte ici et affiché dans le tooltip.
+		// the axe's -2 rides on its attribute modifier (AxeAttributeHandler), so it's already
+		// counted here and shown in the tooltip.
 		return (float) player.getAttributeValue(Attributes.ATTACK_DAMAGE);
 	}
 	
@@ -80,8 +80,8 @@ public class CombatHelper {
 		return attackKnockback;
 	}
 
-	// 1.21 : getDamageBonus(item, MobType) supprimé. Le bonus de dégâts d'enchant (sharpness, smite,
-	// bane, impaling) se calcule via modifyDamage, côté serveur uniquement (0 en prédiction client).
+	// the enchant damage bonus (sharpness, smite, bane, impaling) comes from modifyDamage now,
+	// server-side only (0 in client prediction).
 	private static float enchantDamageBonus(Player player, Entity target, float baseDamage) {
 		if (player.level() instanceof ServerLevel serverLevel) {
 			return EnchantmentHelper.modifyDamage(serverLevel, player.getMainHandItem(), target,
@@ -90,8 +90,8 @@ public class CombatHelper {
 		return 0.0F;
 	}
 
-	// 1.21 : getKnockbackBonus(player) supprimé. Le bonus de l'enchant Knockback passe par
-	// modifyKnockback (base 0), côté serveur uniquement (0 en prédiction client).
+	// the Knockback enchant bonus goes through modifyKnockback (base 0), server-side only
+	// (0 in client prediction).
 	private static float enchantKnockbackBonus(Player player, Entity target) {
 		if (player.level() instanceof ServerLevel serverLevel) {
 			return EnchantmentHelper.modifyKnockback(serverLevel, player.getMainHandItem(), target,
@@ -107,8 +107,8 @@ public class CombatHelper {
 		if (PrideFeature.REVERT_DAMAGE_LOGIC.enabled()) {
 			// Calculate the damage based on mappings from 1.8.9.
 			float additionalDamage = enchantDamageBonus(player, target, baseDamage);
-			// Les armes lourdes gardent le délai des coups (dégâts réduits si on frappe trop tôt),
-			// même en combat 1.8 — sauf si le cooldown de CETTE arme est explicitement désactivé.
+			// heavy weapons keep the attack delay (reduced damage if you swing too early), even
+			// in 1.8 combat, unless the cooldown for THIS weapon is explicitly disabled.
 			if (isHeavyWeapon(player.getMainHandItem())
 					&& !attackCooldownDisabledFor(player.getMainHandItem())) {
 				float attackStrengthScale = player.getAttackStrengthScale(0.5F);
@@ -163,7 +163,7 @@ public class CombatHelper {
 		
 		boolean sprintAndAttackTimerOk = player.isSprinting() && isAttackTimerOk;
 		boolean canAttackSweep = false;
-		// 26.1 : walkDist/walkDistO retirés. getKnownMovement() donne le déplacement horizontal du tick.
+		// getKnownMovement() gives this tick's horizontal movement.
 		double walkDistanceDelta = player.getKnownMovement().horizontalDistance();
 		if (isAttackTimerOk && !isCritical(player, target) && !sprintAndAttackTimerOk && player.onGround()
 				&& walkDistanceDelta < (double) player.getSpeed()) {

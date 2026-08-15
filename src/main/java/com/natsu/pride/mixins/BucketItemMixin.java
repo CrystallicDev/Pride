@@ -11,20 +11,20 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.BucketItem;
 
 /**
- * MLG 1.8.9 : en 1.8.9 le waterlogging n'existe pas, donc vider un seau vise toujours à poser une
- * vraie source où l'on peut atterrir. En moderne, viser une dalle/un escalier "absorbe" l'eau dans
- * le bloc et fait rater le clutch.
+ * 1.8.9 MLG: waterlogging doesn't exist in 1.8.9, so emptying a bucket always aims to place a
+ * real source you can land in. On modern versions, aiming at a slab or stairs "soaks up" the water
+ * into the block, and the clutch fails.
  *
- * <p>Fix : on fait échouer {@code canPlaceLiquid} quand le joueur ne sneak PAS. {@code emptyContents}
- * retombe alors tout seul sur la face cliquée ({@code pos.relative(direction)}) et y pose une source.
- * En sneakant, le comportement vanilla est conservé (waterlogging volontaire).
+ * <p>Fix: we make {@code canPlaceLiquid} fail when the player is NOT sneaking. {@code emptyContents}
+ * then falls back on its own to the clicked face ({@code pos.relative(direction)}) and places a source there.
+ * Sneaking keeps the vanilla behaviour (waterlogging on purpose).
  */
 @Mixin(value = BucketItem.class, remap = false)
 public class BucketItemMixin {
 
-	// 26.1 : emptyContents prend un LivingEntity (au lieu de Player). NeoForge ajoute une surcharge
-	// à 5 args avec l'ItemStack — c'est ELLE qui contient l'appel canPlaceLiquid (vérifié au bytecode).
-	// target canPlaceLiquid sans descripteur : matche quelle que soit sa signature.
+	// NeoForge adds a 5-arg emptyContents overload that takes the ItemStack, and that's the one
+	// actually holding the canPlaceLiquid call (checked against the bytecode).
+	// canPlaceLiquid target with no descriptor: matches whatever the signature happens to be.
 	@ModifyExpressionValue(
 			method = "emptyContents(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/phys/BlockHitResult;Lnet/minecraft/world/item/ItemStack;)Z",
 			at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/LiquidBlockContainer;canPlaceLiquid"))

@@ -28,17 +28,15 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.phys.Vec3;
 
-// Stage 1 (port NeoForge) : seules les méthodes CLIENT/blocage. La réécriture complète de
-// `attack` (combat 1.8.9) est différée au Stage 2 (voir port_stage2/, à re-porter depuis la 1.20.1).
 @Mixin(value = Player.class, remap = false)
 public abstract class PlayerMixin {
 
 	private boolean isReducingParryDamage = false;
 
-	// 26.1 : Player.drop ne swing plus le bras (le swing du Q-drop en monde est géré dans
-	// Minecraft.handleKeybinds, cf. MinecraftMixin). Plus rien à intercepter côté inventaire.
+	// Player.drop doesn't swing the arm anymore (the world Q-drop swing is handled in
+	// Minecraft.handleKeybinds, see MinecraftMixin), so there's nothing left to intercept here.
 
-	// pas de nage (1.8.9)
+	// no swimming (1.8.9)
 	@Inject(method = "updateSwimming", at = @At("HEAD"), cancellable = true)
 	private void preventSwimming(CallbackInfo ci) {
 		if (!PrideFeature.DISABLE_SWIMMING.enabled()) return;
@@ -46,7 +44,7 @@ public abstract class PlayerMixin {
 		ci.cancel();
 	}
 
-	// Cooldown gameplay (dégâts/knockback selon la charge d'attaque). Toggle par type d'arme.
+	// gameplay cooldown (damage/knockback scale with the attack charge). toggle per weapon type.
 	@Inject(method = "getAttackStrengthScale", at = @At("HEAD"), cancellable = true)
 	public void getAttackStrengthScale(float f, CallbackInfoReturnable<Float> cir) {
 		if (!PrideFeature.active()) return;
@@ -55,9 +53,9 @@ public abstract class PlayerMixin {
 		}
 	}
 
-	// 26.1 : le dip visuel de l'arme (descente dans la main) est passé sur un ticker séparé, lu via
-	// getItemSwapScale (plus getAttackStrengthScale). On l'annule aussi, sinon l'arme redescend malgré
-	// le cooldown gameplay désactivé.
+	// the weapon's visual dip (dropping in the hand) is read through getItemSwapScale now, so we
+	// cancel that one too, otherwise the weapon keeps dipping down even with the gameplay
+	// cooldown disabled.
 	@Inject(method = "getItemSwapScale", at = @At("HEAD"), cancellable = true)
 	public void getItemSwapScale(float f, CallbackInfoReturnable<Float> cir) {
 		if (!PrideFeature.active()) return;
@@ -74,7 +72,7 @@ public abstract class PlayerMixin {
 
 		Player self = (Player) (Object) this;
 
-		// pas de isBlocking() : Forge/NeoForge le réserve aux items avec l'ability SHIELD_BLOCK
+		// no isBlocking() here: Forge/NeoForge reserves it for items with the SHIELD_BLOCK ability
 		if (!self.isUsingItem()) return;
 		if (!self.getUseItem().is(ItemTags.SWORDS)) return;
 		if (source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_ARMOR)) return;
@@ -89,13 +87,13 @@ public abstract class PlayerMixin {
 		ci.cancel();
 	}
 
-	// Réécriture complète de l'attaque façon 1.8.9 (dégâts/knockback/crits/sons via CombatHelper).
+	// full 1.8.9-style attack rewrite (damage/knockback/crits/sounds via CombatHelper).
 	@Inject(method = "attack", at = @At("HEAD"), cancellable = true)
 	public void attack(Entity targetEntity, CallbackInfo ci) {
 		if (!PrideFeature.active()) return;
 		Player self = (Player) (Object) this;
 
-		// en bloquant : swing autorisé, mais pas de vrai coup
+		// while blocking: the swing is allowed, but no actual hit lands
 		if (PrideFeature.ALLOW_SWORD_BLOCKING.enabled()
 				&& self.isUsingItem() && self.getUseItem().is(ItemTags.SWORDS)) {
 			ci.cancel();
@@ -148,8 +146,8 @@ public abstract class PlayerMixin {
 						}
 						self.level().playSound(null, self.getX(), self.getY(), self.getZ(),
 								SoundEvents.PLAYER_ATTACK_SWEEP, self.getSoundSource(), 1.0F, 1.0F);
-						// 26.1 : Player.sweepAttack() n'est plus public (fondu dans doSweepAttack) : on
-						// reproduit juste le spawn des particules de sweep.
+						// spawn the sweep particles by hand here, just like a
+						// vanilla sweep attack would.
 						if (self.level() instanceof ServerLevel sweepLevel) {
 							double sdx = -Mth.sin(self.getYRot() * ((float) Math.PI / 180F));
 							double sdz = Mth.cos(self.getYRot() * ((float) Math.PI / 180F));
@@ -176,8 +174,8 @@ public abstract class PlayerMixin {
 
 					self.setLastHurtMob(targetEntity);
 
-					// 1.21 : doPostAttackEffects remplace doPostHurtEffects/doPostDamageEffects ET l'aspect
-					// de feu (fire aspect n'est plus un niveau lu à part, c'est un effet post-attaque).
+					// doPostAttackEffects rolls the post-hit effects and the fire aspect together
+					// (fire aspect isn't a separately-read level anymore, it's a post-attack effect).
 					if (self.level() instanceof ServerLevel serverLevel) {
 						EnchantmentHelper.doPostAttackEffects(serverLevel, targetEntity, damagesource);
 					}
@@ -201,7 +199,7 @@ public abstract class PlayerMixin {
 						float damageDealt = targetHealth - living.getHealth();
 						self.awardStat(Stats.DAMAGE_DEALT, Math.round(damageDealt * 10.0F));
 
-						// particules de dégâts (coeurs) : elles n'existent pas en 1.8
+						// damage indicator particles: they don't exist in 1.8
 						if (!PrideFeature.REVERT_DAMAGE_LOGIC.enabled() && self.level() instanceof ServerLevel serverLevel && damageDealt > 2.0F) {
 							int particles = (int) ((double) damageDealt * 0.5D);
 							serverLevel.sendParticles(ParticleTypes.DAMAGE_INDICATOR, targetEntity.getX(),
